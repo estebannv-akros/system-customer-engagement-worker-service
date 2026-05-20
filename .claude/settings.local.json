@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet *)",
+      "Edit",
+      "Write",
+      "PowerShell(dotnet build *)",
+      "PowerShell(dotnet add $infra package Microsoft.Extensions.DependencyInjection.Abstractions)",
+      "PowerShell(dotnet add $infra package Microsoft.Extensions.Logging.Abstractions)",
+      "PowerShell($infra = \"C:\\\\Users\\\\esteban.navarro\\\\source\\\\repos\\\\system-customer-engagement-worker-service\\\\src\\\\SystemCustomerEngagement.Infrastructure\\\\SystemCustomerEngagement.Infrastructure.csproj\")"
+    ]
+  }
+}
