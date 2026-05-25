@@ -12,14 +12,14 @@ public sealed class ProcessEngagementCommandHandler(
 {
     public async Task HandleAsync(ProcessEngagementCommand command, CancellationToken cancellationToken = default)
     {
-        var engagement = await repository.GetByIdAsync(command.EngagementId, cancellationToken)
-            ?? throw new InvalidOperationException($"Engagement {command.EngagementId} not found.");
+        // TODO: descomentar cuando se integre persistencia
+        // var engagement = await repository.GetByIdAsync(command.EngagementId, cancellationToken)
+        //     ?? throw new InvalidOperationException($"Engagement {command.EngagementId} not found.");
+        // engagement.MarkAsProcessed();
+        // await repository.UpdateAsync(engagement, cancellationToken);
+        // await eventDispatcher.DispatchAsync(engagement.DomainEvents, cancellationToken);
+        // engagement.ClearDomainEvents();
 
-        engagement.MarkAsProcessed();
-
-        await repository.UpdateAsync(engagement, cancellationToken);
-        await eventDispatcher.DispatchAsync(engagement.DomainEvents, cancellationToken);
-
-        engagement.ClearDomainEvents();
+        await Task.CompletedTask;
     }
 }

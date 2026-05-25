@@ -1,7 +1,7 @@
 namespace SystemCustomerEngagement.Contracts.V1;
 
 /// <summary>
-/// Comando de mensajería para solicitar el envío de una comunicación a un cliente.
+/// Comando de mensajería para solicitar la actualización de un contacto en HubSpot.
 /// Channel: "Email" | "Sms" | "Push" | "InApp"
 /// </summary>
 public record CustomerEngagementRequested
@@ -9,6 +9,8 @@ public record CustomerEngagementRequested
     public Guid CorrelationId { get; init; }
     public DateTimeOffset Timestamp { get; init; }
     public Guid CustomerId { get; init; }
+    public string Email { get; init; } = default!;
     public string Channel { get; init; } = default!;
+    public string PasoActual { get; init; } = default!;
     public string Message { get; init; } = default!;
 }

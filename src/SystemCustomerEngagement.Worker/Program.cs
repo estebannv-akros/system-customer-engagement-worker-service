@@ -8,7 +8,7 @@ using SystemCustomerEngagement.Worker.Extensions;
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services
-    .AddInfrastructure()
+    .AddInfrastructure(builder.Configuration)
     .AddApplication()
     .AddMassTransitWithRabbitMq(builder.Configuration);
 

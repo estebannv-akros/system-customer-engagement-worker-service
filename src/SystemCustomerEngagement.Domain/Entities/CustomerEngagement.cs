@@ -52,5 +52,5 @@ public sealed class CustomerEngagement : AggregateRoot
     }
 }
 
-public enum EngagementChannel { Email, Sms, Push, InApp }
+public enum EngagementChannel { Email, Sms, Push }
 public enum EngagementStatus { Pending, Processed, Failed }

@@ -17,10 +17,12 @@ public sealed class CreateEngagementCommandHandler(
         var customerId = CustomerId.Create(command.CustomerId);
         var engagement = CustomerEngagement.Create(customerId, command.Channel, command.Message);
 
-        await repository.AddAsync(engagement, cancellationToken);
-        await eventDispatcher.DispatchAsync(engagement.DomainEvents, cancellationToken);
+        // TODO: descomentar cuando se integre persistencia
+        // await repository.AddAsync(engagement, cancellationToken);
 
+        await eventDispatcher.DispatchAsync(engagement.DomainEvents, cancellationToken);
         engagement.ClearDomainEvents();
+
         return engagement.Id;
     }
 }
