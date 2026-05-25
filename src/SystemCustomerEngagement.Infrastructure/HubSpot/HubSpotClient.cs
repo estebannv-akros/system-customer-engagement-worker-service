@@ -18,7 +18,7 @@ public sealed class HubSpotClient(
 
     public async Task UpsertContactAsync(
         string email,
-        string pasoActual,
+        string CurrentStep,
         CancellationToken cancellationToken = default)
     {
         var request = new BatchUpsertRequest(
@@ -29,13 +29,13 @@ public sealed class HubSpotClient(
                 Properties: new Dictionary<string, string>
                 {
                     ["email"]       = email,
-                    ["paso_actual"] = pasoActual
+                    ["paso_actual"] = CurrentStep
                 })
         ]);
 
         logger.LogDebug(
-            "HubSpot upsert contact Email={Email} PasoActual={PasoActual}",
-            email, pasoActual);
+            "HubSpot upsert contact Email={Email} CurrentStep={CurrentStep}",
+            email, CurrentStep);
 
         var response = await httpClient.PostAsJsonAsync(
             "/crm/v3/objects/contacts/batch/upsert",

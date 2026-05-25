@@ -4,6 +4,6 @@ public interface IHubSpotClient
 {
     Task UpsertContactAsync(
         string email,
-        string pasoActual,
+        string CurrentStep,
         CancellationToken cancellationToken = default);
 }

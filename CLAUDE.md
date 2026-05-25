@@ -31,7 +31,7 @@ This is a **.NET 10 background worker service** following **Domain-Driven Design
 
 **Contracts** (`SystemCustomerEngagement.Contracts`) — no dependencies on other layers
 - Immutable message contracts shared across producers and consumers
-- `V1/CustomerEngagementRequested` — incoming command with `CorrelationId`, `Timestamp`, `CustomerId`, `Channel`, `Message`
+- `V1/CustomerEngagementRequested` — incoming command with `CorrelationId`, `Timestamp`, `CustomerId`, `Email`, `Channel`, `PasoActual`, `Message`; `Email` es el identificador del contacto en HubSpot
 - Naming convention: commands in imperative (`CustomerEngagementRequested`), events in past tense
 
 **Application** (`SystemCustomerEngagement.Application`) — depends on Domain only
@@ -44,10 +44,10 @@ This is a **.NET 10 background worker service** following **Domain-Driven Design
 - `InMemoryCustomerEngagementRepository` using `ConcurrentDictionary` — repository calls are **commented out** in handlers while persistencia no está integrada
 - `DomainEventDispatcher` — publishes domain events to RabbitMQ via MassTransit `IPublishEndpoint`; registered as **scoped** (inherits the active consumer context to propagate `CorrelationId`)
 - `LoggingFilter<T>` — MassTransit consume filter that enriches every log with `MessageId`, `CorrelationId`, `MessageType`, and processing duration
-- `HubSpotClient` — stub de `IHubSpotClient`; solo loggea por ahora; **TODO: implementar llamada real a la API de HubSpot**
+- `HubSpotClient` — implementación real de `IHubSpotClient`; llama a `POST /crm/v3/objects/contacts/batch/upsert` con `idProperty: "email"` para crear o actualizar el contacto y setear `paso_actual`; `429`/`5xx` → `TransientException`, `4xx` → `PermanentException`; registrado vía `AddHttpClient` con `Authorization: Bearer` configurado desde `HubSpot:AccessToken`
 
 **Worker** (`SystemCustomerEngagement.Worker`) — entry point, depends on all layers
-- `Consumers/CustomerEngagementConsumer` — `IConsumer<CustomerEngagementRequested>`; recibe mensajes de RabbitMQ y llama a `IHubSpotClient.CreateEngagementAsync`; mapea canal inválido y `ArgumentException` a `PermanentException`
+- `Consumers/CustomerEngagementConsumer` — `IConsumer<CustomerEngagementRequested>`; recibe mensajes de RabbitMQ, valida `Email` y `PasoActual`, y llama a `IHubSpotClient.UpsertContactAsync`; mapea canal inválido y campos vacíos a `PermanentException`
 - `Extensions/MassTransitExtensions.cs` — configures MassTransit + RabbitMQ (see Messaging section below)
 - `Program.cs` — wires DI, MassTransit, and OpenTelemetry
 
@@ -64,6 +64,8 @@ Queue type: **quorum queue** (`SetQuorumQueue()`). Concurrency: `PrefetchCount =
 
 Config keys (`appsettings.json`):
 - `RabbitMq:Host`, `RabbitMq:Port`, `RabbitMq:VirtualHost`, `RabbitMq:Username`, `RabbitMq:Password`, `RabbitMq:UseSsl`
+- `HubSpot:BaseUrl` — base URL de la API (`https://api.hubapi.com`)
+- `HubSpot:AccessToken` — Private App Token de HubSpot; usar secrets/env vars en producción
 - `Otlp:Endpoint` — OTLP gRPC endpoint for Datadog Agent
 
 Development defaults (`appsettings.Development.json`): `localhost:5672`, `guest/guest`, SSL off.

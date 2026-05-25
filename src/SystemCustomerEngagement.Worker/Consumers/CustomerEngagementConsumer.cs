@@ -20,21 +20,21 @@ public sealed class CustomerEngagementConsumer(
         if (string.IsNullOrWhiteSpace(msg.Email))
             throw new PermanentException("El campo Email es requerido para identificar el contacto en HubSpot.");
 
-        if (string.IsNullOrWhiteSpace(msg.PasoActual))
-            throw new PermanentException("El campo PasoActual es requerido.");
+        if (string.IsNullOrWhiteSpace(msg.CurrentStep))
+            throw new PermanentException("El campo CurrentStep es requerido.");
 
         logger.LogInformation(
-            "Procesando engagement. CustomerId={CustomerId} Email={Email} Channel={Channel} PasoActual={PasoActual}",
-            msg.CustomerId, msg.Email, msg.Channel, msg.PasoActual);
+            "Procesando engagement. CustomerId={CustomerId} Email={Email} Channel={Channel} CurrentStep={CurrentStep}",
+            msg.CustomerId, msg.Email, msg.Channel, msg.CurrentStep);
 
         await hubSpotClient.UpsertContactAsync(
             msg.Email,
-            msg.PasoActual,
+            msg.CurrentStep,
             context.CancellationToken);
 
         logger.LogInformation(
-            "Contacto actualizado en HubSpot. Email={Email} PasoActual={PasoActual}",
-            msg.Email, msg.PasoActual);
+            "Contacto actualizado en HubSpot. Email={Email} CurrentStep={CurrentStep}",
+            msg.Email, msg.CurrentStep);
 
         // TODO: descomentar cuando se integre persistencia
         // var channel = Enum.Parse<EngagementChannel>(msg.Channel, ignoreCase: true);

@@ -11,6 +11,6 @@ public record CustomerEngagementRequested
     public Guid CustomerId { get; init; }
     public string Email { get; init; } = default!;
     public string Channel { get; init; } = default!;
-    public string PasoActual { get; init; } = default!;
+    public string CurrentStep { get; init; } = default!;
     public string Message { get; init; } = default!;
 }
