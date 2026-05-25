@@ -2,8 +2,7 @@ namespace SystemCustomerEngagement.Application.Interfaces;
 
 public interface IHubSpotClient
 {
-    Task UpsertContactAsync(
-        string email,
-        string CurrentStep,
+    Task UpsertContactsBatchAsync(
+        IReadOnlyList<(string Email, string CurrentStep)> contacts,
         CancellationToken cancellationToken = default);
 }

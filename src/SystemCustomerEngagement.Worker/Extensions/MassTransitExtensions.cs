@@ -16,7 +16,15 @@ public static class MassTransitExtensions
     {
         services.AddMassTransit(x =>
         {
-            x.AddConsumer<CustomerEngagementConsumer>();
+            x.AddConsumer<CustomerEngagementConsumer>(cfg =>
+            {
+                cfg.Options<BatchOptions>(b =>
+                {
+                    b.MessageLimit = 10;
+                    b.TimeLimit    = TimeSpan.FromSeconds(30);
+                    b.ConcurrencyLimit = 4;
+                });
+            });
 
             x.UsingRabbitMq((context, cfg) =>
             {
@@ -39,9 +47,8 @@ public static class MassTransitExtensions
                     // Quorum queue: replicada, durable, tolerante a fallos
                     e.SetQuorumQueue();
 
-                    // Concurrencia según lineamientos: PrefetchCount ≈ ConcurrentMessageLimit × 2
-                    e.PrefetchCount = 16;
-                    e.ConcurrentMessageLimit = 8;
+                    // PrefetchCount cubre MessageLimit × ConcurrencyLimit del batch
+                    e.PrefetchCount = 40;
 
                     // Logging estructurado en cada mensaje (MessageId, CorrelationId, MessageType)
                     e.UseConsumeFilter(typeof(LoggingFilter<>), context);

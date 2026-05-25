@@ -8,41 +8,52 @@ namespace SystemCustomerEngagement.Worker.Consumers;
 
 public sealed class CustomerEngagementConsumer(
     IHubSpotClient hubSpotClient,
-    ILogger<CustomerEngagementConsumer> logger) : IConsumer<CustomerEngagementRequested>
+    ILogger<CustomerEngagementConsumer> logger) : IConsumer<Batch<CustomerEngagementRequested>>
 {
-    public async Task Consume(ConsumeContext<CustomerEngagementRequested> context)
+    public async Task Consume(ConsumeContext<Batch<CustomerEngagementRequested>> context)
     {
-        var msg = context.Message;
+        var valid = new List<(string Email, string CurrentStep)>();
 
-        if (!Enum.TryParse<EngagementChannel>(msg.Channel, ignoreCase: true, out _))
-            throw new PermanentException($"Canal desconocido: '{msg.Channel}'. Valores válidos: Email, Sms, Push, InApp.");
+        foreach (var item in context.Message)
+        {
+            var msg = item.Message;
 
-        if (string.IsNullOrWhiteSpace(msg.Email))
-            throw new PermanentException("El campo Email es requerido para identificar el contacto en HubSpot.");
+            if (!Enum.TryParse<EngagementChannel>(msg.Channel, ignoreCase: true, out _))
+            {
+                logger.LogWarning(
+                    "Mensaje descartado — canal desconocido: '{Channel}'. CustomerId={CustomerId}",
+                    msg.Channel, msg.CustomerId);
+                continue;
+            }
 
-        if (string.IsNullOrWhiteSpace(msg.CurrentStep))
-            throw new PermanentException("El campo CurrentStep es requerido.");
+            if (string.IsNullOrWhiteSpace(msg.Email) || string.IsNullOrWhiteSpace(msg.CurrentStep))
+            {
+                logger.LogWarning(
+                    "Mensaje descartado — Email o CurrentStep vacío. CustomerId={CustomerId}",
+                    msg.CustomerId);
+                continue;
+            }
+
+            valid.Add((msg.Email, msg.CurrentStep));
+        }
+
+        if (valid.Count == 0)
+        {
+            logger.LogInformation("Batch recibido sin mensajes válidos, se omite llamada a HubSpot.");
+            return;
+        }
 
         logger.LogInformation(
-            "Procesando engagement. CustomerId={CustomerId} Email={Email} Channel={Channel} CurrentStep={CurrentStep}",
-            msg.CustomerId, msg.Email, msg.Channel, msg.CurrentStep);
+            "Procesando batch hacia HubSpot. Count={Count}",
+            valid.Count);
 
-        await hubSpotClient.UpsertContactAsync(
-            msg.Email,
-            msg.CurrentStep,
-            context.CancellationToken);
+        await hubSpotClient.UpsertContactsBatchAsync(valid, context.CancellationToken);
 
         logger.LogInformation(
-            "Contacto actualizado en HubSpot. Email={Email} CurrentStep={CurrentStep}",
-            msg.Email, msg.CurrentStep);
+            "Batch enviado a HubSpot. Count={Count}",
+            valid.Count);
 
         // TODO: descomentar cuando se integre persistencia
-        // var channel = Enum.Parse<EngagementChannel>(msg.Channel, ignoreCase: true);
-        // var engagementId = await createHandler.HandleAsync(
-        //     new CreateEngagementCommand(msg.CustomerId, channel, msg.Message),
-        //     context.CancellationToken);
-        // await processHandler.HandleAsync(
-        //     new ProcessEngagementCommand(engagementId),
-        //     context.CancellationToken);
+        // foreach (var (email, step) in valid) { ... }
     }
 }

@@ -16,26 +16,22 @@ public sealed class HubSpotClient(
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
-    public async Task UpsertContactAsync(
-        string email,
-        string CurrentStep,
+    public async Task UpsertContactsBatchAsync(
+        IReadOnlyList<(string Email, string CurrentStep)> contacts,
         CancellationToken cancellationToken = default)
     {
-        var request = new BatchUpsertRequest(
-        [
-            new UpsertInput(
-                IdProperty: "email",
-                Id: email,
-                Properties: new Dictionary<string, string>
-                {
-                    ["email"]       = email,
-                    ["paso_actual"] = CurrentStep
-                })
-        ]);
+        var inputs = contacts.Select(c => new UpsertInput(
+            IdProperty: "email",
+            Id: c.Email,
+            Properties: new Dictionary<string, string>
+            {
+                ["email"]       = c.Email,
+                ["paso_actual"] = c.CurrentStep
+            })).ToList();
 
-        logger.LogDebug(
-            "HubSpot upsert contact Email={Email} CurrentStep={CurrentStep}",
-            email, CurrentStep);
+        var request = new BatchUpsertRequest(inputs);
+
+        logger.LogDebug("HubSpot upsert batch Count={Count}", contacts.Count);
 
         var response = await httpClient.PostAsJsonAsync(
             "/crm/v3/objects/contacts/batch/upsert",
@@ -50,8 +46,8 @@ public sealed class HubSpotClient(
         var statusCode = (int)response.StatusCode;
 
         logger.LogWarning(
-            "HubSpot respondió {StatusCode} para Email={Email}. Body: {Body}",
-            statusCode, email, body);
+            "HubSpot respondió {StatusCode} para batch de {Count} contactos. Body: {Body}",
+            statusCode, contacts.Count, body);
 
         if (statusCode == 429 || statusCode >= 500)
             throw new TransientException($"HubSpot {statusCode} — reintentable. Body: {body}");
