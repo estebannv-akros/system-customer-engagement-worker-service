@@ -11,7 +11,10 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
         services.AddSingleton<ICustomerEngagementRepository, InMemoryCustomerEngagementRepository>();
-        services.AddSingleton<IDomainEventDispatcher, DomainEventDispatcher>();
+
+        // Scoped porque depende de IPublishEndpoint que es scoped (contexto del consumer activo)
+        services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
+
         return services;
     }
 }

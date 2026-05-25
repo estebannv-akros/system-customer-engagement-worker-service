@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/SystemCustomerEngagement.Application/SystemCustomerEngagement.Application.csproj" />
+    <Project Path="src/SystemCustomerEngagement.Contracts/SystemCustomerEngagement.Contracts.csproj" />
     <Project Path="src/SystemCustomerEngagement.Domain/SystemCustomerEngagement.Domain.csproj" />
     <Project Path="src/SystemCustomerEngagement.Infrastructure/SystemCustomerEngagement.Infrastructure.csproj" />
     <Project Path="src/SystemCustomerEngagement.Worker/SystemCustomerEngagement.Worker.csproj" />
