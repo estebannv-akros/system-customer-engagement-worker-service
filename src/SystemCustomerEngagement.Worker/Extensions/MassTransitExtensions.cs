@@ -1,5 +1,5 @@
 using MassTransit;
-using SystemCustomerEngagement.Contracts.V1;
+using SystemCustomerEngagement.Worker.Contracts;
 using SystemCustomerEngagement.Domain.Exceptions;
 using SystemCustomerEngagement.Infrastructure.Messaging;
 using SystemCustomerEngagement.Worker.Consumers;
