@@ -1,5 +1,5 @@
 using MassTransit;
-using SystemCustomerEngagement.Contracts.V1;
+using SystemCustomerEngagement.Worker.Contracts;
 using SystemCustomerEngagement.Domain.Exceptions;
 using SystemCustomerEngagement.Infrastructure.Messaging;
 using SystemCustomerEngagement.Worker.Consumers;
@@ -8,7 +8,9 @@ namespace SystemCustomerEngagement.Worker.Extensions;
 
 public static class MassTransitExtensions
 {
-    private const string QueueName = "customer-engagement.engagements";
+    private const string EngagementsQueue   = "customer-engagement.engagements";
+    private const string NotificationsQueue = "customer-engagement.notifications";
+    private const string InteractionsQueue  = "customer-engagement.interactions";
 
     public static IServiceCollection AddMassTransitWithRabbitMq(
         this IServiceCollection services,
@@ -42,18 +44,13 @@ public static class MassTransitExtensions
                         h.UseSsl(s => s.ServerName = host);
                 });
 
-                cfg.ReceiveEndpoint(QueueName, e =>
+                // Cola: engagements
+                cfg.ReceiveEndpoint(EngagementsQueue, e =>
                 {
-                    // Quorum queue: replicada, durable, tolerante a fallos
                     e.SetQuorumQueue();
-
-                    // PrefetchCount cubre MessageLimit × ConcurrencyLimit del batch
                     e.PrefetchCount = 40;
-
-                    // Logging estructurado en cada mensaje (MessageId, CorrelationId, MessageType)
                     e.UseConsumeFilter(typeof(LoggingFilter<>), context);
 
-                    // Reintentos rápidos en memoria: deadlocks, timeouts cortos
                     e.UseMessageRetry(r =>
                     {
                         r.Exponential(
@@ -62,12 +59,61 @@ public static class MassTransitExtensions
                             maxInterval: TimeSpan.FromSeconds(2),
                             intervalDelta: TimeSpan.FromMilliseconds(200));
 
-                        // Errores permanentes van directo a DLQ sin reintentar
                         r.Ignore<PermanentException>();
                     });
 
-                    // Reentregas con delay: rate limit, dependencias caídas
-                    // Requiere plugin rabbitmq_delayed_message_exchange
+                    e.UseDelayedRedelivery(r => r.Intervals(
+                        TimeSpan.FromSeconds(30),
+                        TimeSpan.FromMinutes(2),
+                        TimeSpan.FromMinutes(10)));
+
+                    e.ConfigureConsumer<CustomerEngagementConsumer>(context);
+                });
+
+                // Cola: notifications
+                cfg.ReceiveEndpoint(NotificationsQueue, e =>
+                {
+                    e.SetQuorumQueue();
+                    e.PrefetchCount = 40;
+                    e.UseConsumeFilter(typeof(LoggingFilter<>), context);
+
+                    e.UseMessageRetry(r =>
+                    {
+                        r.Exponential(
+                            retryLimit: 3,
+                            minInterval: TimeSpan.FromMilliseconds(100),
+                            maxInterval: TimeSpan.FromSeconds(2),
+                            intervalDelta: TimeSpan.FromMilliseconds(200));
+
+                        r.Ignore<PermanentException>();
+                    });
+
+                    e.UseDelayedRedelivery(r => r.Intervals(
+                        TimeSpan.FromSeconds(30),
+                        TimeSpan.FromMinutes(2),
+                        TimeSpan.FromMinutes(10)));
+
+                    e.ConfigureConsumer<CustomerEngagementConsumer>(context);
+                });
+
+                // Cola: interactions
+                cfg.ReceiveEndpoint(InteractionsQueue, e =>
+                {
+                    e.SetQuorumQueue();
+                    e.PrefetchCount = 40;
+                    e.UseConsumeFilter(typeof(LoggingFilter<>), context);
+
+                    e.UseMessageRetry(r =>
+                    {
+                        r.Exponential(
+                            retryLimit: 3,
+                            minInterval: TimeSpan.FromMilliseconds(100),
+                            maxInterval: TimeSpan.FromSeconds(2),
+                            intervalDelta: TimeSpan.FromMilliseconds(200));
+
+                        r.Ignore<PermanentException>();
+                    });
+
                     e.UseDelayedRedelivery(r => r.Intervals(
                         TimeSpan.FromSeconds(30),
                         TimeSpan.FromMinutes(2),
