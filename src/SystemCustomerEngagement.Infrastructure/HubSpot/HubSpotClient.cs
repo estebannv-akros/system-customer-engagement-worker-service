@@ -27,7 +27,7 @@ public sealed class HubSpotClient(
             {
                 ["email"]       = c.Email,
                 ["paso_actual"] = c.CurrentStep
-            })).ToList();
+            }));
 
         var request = new BatchUpsertRequest(inputs);
 
@@ -56,7 +56,7 @@ public sealed class HubSpotClient(
     }
 
     private sealed record BatchUpsertRequest(
-        [property: JsonPropertyName("inputs")] IReadOnlyList<UpsertInput> Inputs);
+        [property: JsonPropertyName("inputs")] IEnumerable<UpsertInput> Inputs);
 
     private sealed record UpsertInput(
         [property: JsonPropertyName("idProperty")] string IdProperty,

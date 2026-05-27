@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SystemCustomerEngagement.Domain\SystemCustomerEngagement.Domain.csproj" />
+	<ProjectReference Include="..\SystemCustomerEngagement.Infrastructure\SystemCustomerEngagement.Infrastructure.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
