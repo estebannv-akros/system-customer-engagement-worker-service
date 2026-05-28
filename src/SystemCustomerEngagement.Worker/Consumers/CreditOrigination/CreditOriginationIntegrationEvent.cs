@@ -1,6 +1,6 @@
-namespace AppMicroserviceCustomerEngagement.Worker.Contracts;
+namespace app.microservice.customer.engagement.worker.Consumers.CreditOrigination;
 
-public record UpdateUserIntegrationEvent
+public record CreditOriginationIntegrationEvent
 {
     public Guid CorrelationId { get; init; }
     public DateTimeOffset Timestamp { get; init; }

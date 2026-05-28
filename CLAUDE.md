@@ -9,89 +9,64 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 dotnet build
 
 # Run the worker service (requires RabbitMQ running locally)
-dotnet run --project src\SystemCustomerEngagement.Worker\SystemCustomerEngagement.Worker.csproj
+dotnet run --project src\SystemCustomerEngagement.Worker\app.microservice.customer.engagement.worker.csproj
 
 # Run tests (if added)
 dotnet test
 ```
 
+## Environment setup
+
+Copy `.env.example` to `.env` in the Worker project and fill in the values. The app loads it automatically via DotNetEnv at startup.
+
+```
+src\SystemCustomerEngagement.Worker\.env.example → src\SystemCustomerEngagement.Worker\.env
+```
+
+Key config values:
+- `RabbitMq__Host/Port/VirtualHost/Username/Password/UseSsl` — RabbitMQ connection
+- `HubSpot__BaseUrl` / `HubSpot__AccessToken` — HubSpot Private App Token (Bearer)
+- `Otlp__Enabled` / `Otlp__Endpoint` — OTLP gRPC for Datadog Agent
+
 ## Architecture
 
-This is a **.NET 10 background worker service** following **Domain-Driven Design (DDD)** and **Clean Architecture** with the **CQRS pattern**. The solution has five layers with strict dependency direction (outer layers depend on inner layers):
+**.NET 10 background worker service** using **MassTransit + RabbitMQ**. Root namespace is `AppMicroserviceCustomerEngagement`.
 
-### Layers
+### Layer overview
 
-**Domain** (`SystemCustomerEngagement.Domain`) — no dependencies on other layers
-- `CustomerEngagement` aggregate root with `CustomerId` value object
-- `EngagementChannel` (Email, Sms, Push) and `EngagementStatus` (Pending, Processed, Failed) enums
-- Domain events raised on state transitions: Created, Processed, Failed
-- `ICustomerEngagementRepository` repository interface
-- `TransientException` — signals a retryable error; MassTransit will apply retry/redelivery
-- `PermanentException` — signals a non-retryable error; MassTransit sends directly to DLQ
+**Domain** (`app.microservice.customer.engagement.domain`)
+- `Exceptions/TransientException` — retryable error; MassTransit applies retry/redelivery
+- `Exceptions/PermanentException` — non-retryable; goes directly to DLQ
 
-**Contracts** (`SystemCustomerEngagement.Contracts`) — no dependencies on other layers
-- Immutable message contracts shared across producers and consumers
-- The contract `CustomerEngagementRequested` also lives in `Worker/Contracts/` (local copy used by the consumer)
-- `V1/CustomerEngagementRequested` — incoming command with `CorrelationId`, `Timestamp`, `CustomerId`, `Email`, `Channel`, `PasoActual`, `Message`; `Email` is the HubSpot contact identifier
+**Infrastructure** (`app.microservice.customer.engagement.infrastructure`)
+- `HubSpot/HubSpotServiceProvider` — calls `POST /crm/v3/objects/contacts/batch/upsert` with `idProperty: "email"` to upsert contacts and set `paso_actual`; throws `TransientException` on `429`/`5xx`, `PermanentException` on other `4xx`
+- `Messaging/LoggingFilter<T>` — MassTransit consume filter; enriches every log with `MessageId`, `CorrelationId`, `MessageType`, and processing duration
 
-**Application** (`SystemCustomerEngagement.Application`) — depends on Domain only
-- CQRS via `ICommandHandler<TCommand>` and `IQueryHandler<TQuery, TResult>` interfaces
-- Commands: `CreateEngagementCommand`, `ProcessEngagementCommand`
-- Queries: `GetPendingEngagementsQuery` → returns `IEnumerable<EngagementDto>`
-- `IDomainEventDispatcher` and `IHubSpotClient` interfaces
+**Worker** (`app.microservice.customer.engagement.worker`) — entry point
+- `Contracts/` — local message contract records (one per queue)
+- `Consumers/` — handler + mapper pair per queue (see below)
+- `Extensions/MassTransitExtensions.cs` — all queue/consumer registration
 
-**Infrastructure** (`SystemCustomerEngagement.Infrastructure`) — implements Application/Domain interfaces
-- `InMemoryCustomerEngagementRepository` using `ConcurrentDictionary` — repository calls are **commented out** in handlers while persistence is not yet integrated
-- `DomainEventDispatcher` — publishes domain events to RabbitMQ via MassTransit `IPublishEndpoint`; registered as **scoped** (inherits the active consumer context to propagate `CorrelationId`)
-- `LoggingFilter<T>` — MassTransit consume filter that enriches every log with `MessageId`, `CorrelationId`, `MessageType`, and processing duration
-- `HubSpotClient` — calls `POST /crm/v3/objects/contacts/batch/upsert` with `idProperty: "email"` to upsert the contact and set `paso_actual`; `429`/`5xx` → `TransientException`, `4xx` → `PermanentException`; registered via `AddHttpClient` with `Authorization: Bearer` from `HubSpot:AccessToken`
+### Active queues and consumers
 
-**Worker** (`SystemCustomerEngagement.Worker`) — entry point, depends on all layers
-- `Consumers/CustomerEngagementConsumer` — `IConsumer<Batch<CustomerEngagementRequested>>`; receives batches from RabbitMQ, **silently skips** messages with invalid `Email`, `PasoActual`, or `Channel` (no exception thrown), and calls `IHubSpotClient.UpsertContactsBatchAsync` for the valid subset
-- `Extensions/MassTransitExtensions.cs` — configures MassTransit + RabbitMQ (see Messaging section below)
-- `Program.cs` — loads `.env` via DotNetEnv, wires DI, MassTransit, and OpenTelemetry
+Each integration flow has three files: a **contract** record, a **mapper** (static, validates and projects to `(Email, CurrentStep)` tuples), and a **handler** (`IConsumer<Batch<T>>`).
 
-### Messaging (MassTransit + RabbitMQ)
+| Queue name | Contract | Handler | Mapper |
+|---|---|---|---|
+| `customer_engagement_upsert_credit_origination_integration_event` | `CreditFlowStepIntegrationEvent` | `CreditOriginationIntegrationEventHandler` | `CreditOriginationIntegrationEventMapper` |
+| `customer_engagement_upsert_smart_origination_integration_event` | `SmartOriginationIntegrationEvent` | `SmartOriginationIntegrationEventHandler` | `SmartOriginationIntegrationEventMapper` |
+| `customer_engagement_upsert_user_registration_integration_event` | `UpdateUserIntegrationEvent` | `UpdateUserIntegrationEventHandler` | `UpdateUserIntegrationEventMapper` |
 
-Three active quorum queues (pattern: `{service}.{purpose}`):
-- `customer-engagement.engagements`
-- `customer-engagement.notifications`
-- `customer-engagement.interactions`
+All queues are **quorum queues**. Batch settings: `MessageLimit=10`, `TimeLimit=30s`, `ConcurrencyLimit=4`, `PrefetchCount=40`.
 
-All three use `CustomerEngagementConsumer` with identical configuration.
-
-Batch settings per queue: `MessageLimit = 10`, `TimeLimit = 30s`, `ConcurrencyLimit = 4`, `PrefetchCount = 40`.
-
-Retry policy (applied in `MassTransitExtensions.cs`):
+Retry policy (identical across all queues):
 1. **Immediate retry** — 3 attempts, exponential backoff (100ms → 2s); ignores `PermanentException`
-2. **Delayed redelivery** — 3 redeliveries at 30s / 2min / 10min; requires the `rabbitmq_delayed_message_exchange` plugin
-3. If all attempts fail → MassTransit moves the message to the automatic `_error` queue (DLQ)
+2. **Delayed redelivery** — 3 redeliveries at 30s / 2min / 10min (requires `rabbitmq_delayed_message_exchange` plugin)
+3. All attempts exhausted → MassTransit moves message to `{queue_name}_error` (DLQ)
 
-Config keys (`appsettings.json`):
-- `RabbitMq:Host`, `RabbitMq:Port`, `RabbitMq:VirtualHost`, `RabbitMq:Username`, `RabbitMq:Password`, `RabbitMq:UseSsl`
-- `HubSpot:BaseUrl` — API base URL (`https://api.hubapi.com`)
-- `HubSpot:AccessToken` — Private App Token; use secrets/env vars in production
-- `Otlp:Enabled`, `Otlp:Endpoint` — OTLP gRPC endpoint for Datadog Agent
+### Adding a new integration flow
 
-Development defaults (`appsettings.Development.json`): `localhost:5672`, `guest/guest`, SSL off. Override via `.env` (see `.env.example`).
-
-### Observability (OpenTelemetry)
-
-Configured in `Program.cs`:
-- Traces: `AddSource("MassTransit")` + HTTP client instrumentation → OTLP exporter (only when `Otlp:Enabled = true`)
-- Metrics: `AddMeter("MassTransit")` + runtime instrumentation → OTLP exporter
-- Every consume log automatically includes `MessageId`, `CorrelationId`, `MessageType` via `LoggingFilter<T>`
-
-### Adding new consumers
-
-1. Add a contract record in `Contracts/V{n}/` (and optionally a local copy in `Worker/Contracts/`)
-2. Add a consumer class in `Worker/Consumers/` implementing `IConsumer<Batch<TMessage>>` or `IConsumer<TMessage>`
-3. Register with `x.AddConsumer<TConsumer>()` in `MassTransitExtensions.cs`
-4. Add a `cfg.ReceiveEndpoint(...)` block with quorum queue, batch settings, retry, redelivery, and `LoggingFilter`
-5. Silently skip invalid messages (no exception); throw `PermanentException` for non-retryable processing errors, `TransientException` for retryable ones
-
-### Adding new use cases (CQRS)
-
-1. Add command/query class in `Application/Commands` or `Application/Queries`
-2. Add handler in `Application/Handlers` implementing `ICommandHandler` or `IQueryHandler`
-3. Register handler in `Worker/Extensions/ApplicationServiceExtensions.cs`
+1. Add a contract record in `Worker/Contracts/`
+2. Add a static mapper in `Worker/Consumers/` implementing `ToHubSpotContacts(IEnumerable<TEvent>, ILogger)`
+3. Add a handler in `Worker/Consumers/` implementing `IConsumer<Batch<TEvent>>`; silently skip invalid messages (no exception), use `TransientException`/`PermanentException` for HubSpot errors
+4. Register in `MassTransitExtensions.cs`: `x.AddConsumer<THandler>` with batch options + `cfg.ReceiveEndpoint` with quorum queue, retry, redelivery, and `LoggingFilter`

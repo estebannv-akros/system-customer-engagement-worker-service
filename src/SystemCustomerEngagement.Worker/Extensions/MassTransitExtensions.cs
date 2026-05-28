@@ -1,6 +1,8 @@
+using app.microservice.customer.engagement.worker.Consumers.CreditOrigination;
+using app.microservice.customer.engagement.worker.Consumers.SmartOrigination;
+using app.microservice.customer.engagement.worker.Consumers.UpdateUser;
 using AppMicroserviceCustomerEngagement.Domain.Exceptions;
 using AppMicroserviceCustomerEngagement.Infrastructure.Messaging;
-using AppMicroserviceCustomerEngagement.Worker.Consumers;
 using MassTransit;
 
 namespace AppMicroserviceCustomerEngagement.Worker.Extensions;
@@ -22,7 +24,7 @@ public static class MassTransitExtensions
     {
         services.AddMassTransit(x =>
         {
-            x.AddConsumer<CreditOriginationIntegrationEventHandler>(cfg =>
+            x.AddConsumer<CreditOriginationConsumer>(cfg =>
             {
                 cfg.Options<BatchOptions>(b =>
                 {
@@ -32,7 +34,7 @@ public static class MassTransitExtensions
                 });
             });
 
-            x.AddConsumer<SmartOriginationIntegrationEventHandler>(cfg =>
+            x.AddConsumer<SmartOriginationConsumer>(cfg =>
             {
                 cfg.Options<BatchOptions>(b =>
                 {
@@ -42,7 +44,7 @@ public static class MassTransitExtensions
                 });
             });
 
-            x.AddConsumer<UpdateUserIntegrationEventHandler>(cfg =>
+            x.AddConsumer<UpdateUserConsumer>(cfg =>
             {
                 cfg.Options<BatchOptions>(b =>
                 {
@@ -90,7 +92,7 @@ public static class MassTransitExtensions
                         TimeSpan.FromMinutes(2),
                         TimeSpan.FromMinutes(10)));
 
-                    e.ConfigureConsumer<CreditOriginationIntegrationEventHandler>(context);
+                    e.ConfigureConsumer<CreditOriginationConsumer>(context);
                 });
 
                 cfg.ReceiveEndpoint(SmartOriginationQueue, e =>
@@ -115,7 +117,7 @@ public static class MassTransitExtensions
                         TimeSpan.FromMinutes(2),
                         TimeSpan.FromMinutes(10)));
 
-                    e.ConfigureConsumer<SmartOriginationIntegrationEventHandler>(context);
+                    e.ConfigureConsumer<SmartOriginationConsumer>(context);
                 });
 
                 cfg.ReceiveEndpoint(UpdateUserQueue, e =>
@@ -140,7 +142,7 @@ public static class MassTransitExtensions
                         TimeSpan.FromMinutes(2),
                         TimeSpan.FromMinutes(10)));
 
-                    e.ConfigureConsumer<UpdateUserIntegrationEventHandler>(context);
+                    e.ConfigureConsumer<UpdateUserConsumer>(context);
                 });
             });
         });

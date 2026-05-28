@@ -1,6 +1,6 @@
-namespace AppMicroserviceCustomerEngagement.Worker.Contracts;
+namespace app.microservice.customer.engagement.worker.Consumers.UpdateUser;
 
-public record SmartOriginationIntegrationEvent
+public record UpdateUserIntegrationEvent
 {
     public Guid CorrelationId { get; init; }
     public DateTimeOffset Timestamp { get; init; }

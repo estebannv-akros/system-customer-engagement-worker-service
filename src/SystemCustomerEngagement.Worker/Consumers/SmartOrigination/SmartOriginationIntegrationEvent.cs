@@ -1,6 +1,6 @@
-namespace AppMicroserviceCustomerEngagement.Worker.Contracts;
+namespace app.microservice.customer.engagement.worker.Consumers.SmartOrigination;
 
-public record CreditFlowStepIntegrationEvent
+public record SmartOriginationIntegrationEvent
 {
     public Guid CorrelationId { get; init; }
     public DateTimeOffset Timestamp { get; init; }

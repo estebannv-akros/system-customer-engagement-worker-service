@@ -1,12 +1,11 @@
 using MassTransit;
 using AppMicroserviceCustomerEngagement.Infrastructure.HubSpot;
-using AppMicroserviceCustomerEngagement.Worker.Contracts;
 
-namespace AppMicroserviceCustomerEngagement.Worker.Consumers;
+namespace app.microservice.customer.engagement.worker.Consumers.UpdateUser;
 
-public sealed class UpdateUserIntegrationEventHandler(
+public sealed class UpdateUserConsumer(
     HubSpotServiceProvider hubspotServiceProvider,
-    ILogger<UpdateUserIntegrationEventHandler> logger) : IConsumer<Batch<UpdateUserIntegrationEvent>>
+    ILogger<UpdateUserConsumer> logger) : IConsumer<Batch<UpdateUserIntegrationEvent>>
 {
     public async Task Consume(ConsumeContext<Batch<UpdateUserIntegrationEvent>> context)
     {

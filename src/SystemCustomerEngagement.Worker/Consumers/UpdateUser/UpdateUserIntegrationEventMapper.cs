@@ -1,6 +1,4 @@
-using AppMicroserviceCustomerEngagement.Worker.Contracts;
-
-namespace AppMicroserviceCustomerEngagement.Worker.Consumers;
+namespace app.microservice.customer.engagement.worker.Consumers.UpdateUser;
 
 public static class UpdateUserIntegrationEventMapper
 {
