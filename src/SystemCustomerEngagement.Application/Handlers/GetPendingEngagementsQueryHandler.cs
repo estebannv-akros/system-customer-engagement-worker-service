@@ -5,7 +5,7 @@ using SystemCustomerEngagement.Domain.Repositories;
 
 namespace SystemCustomerEngagement.Application.Handlers;
 
-public sealed class GetPendingEngagementsQueryHandler(ICustomerEngagementRepository repository)
+public sealed class GetPendingEngagementsQueryHandler(IRepository repository)
     : IQueryHandler<GetPendingEngagementsQuery, IEnumerable<EngagementDto>>
 {
     public async Task<IEnumerable<EngagementDto>> HandleAsync(GetPendingEngagementsQuery query, CancellationToken cancellationToken = default)

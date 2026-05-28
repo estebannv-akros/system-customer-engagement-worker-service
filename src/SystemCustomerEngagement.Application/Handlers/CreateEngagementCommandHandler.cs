@@ -1,14 +1,12 @@
 using SystemCustomerEngagement.Application.Commands;
 using SystemCustomerEngagement.Application.Common;
 using SystemCustomerEngagement.Application.Interfaces;
-using SystemCustomerEngagement.Domain.Entities;
 using SystemCustomerEngagement.Domain.Repositories;
-using SystemCustomerEngagement.Domain.ValueObjects;
 
 namespace SystemCustomerEngagement.Application.Handlers;
 
 public sealed class CreateEngagementCommandHandler(
-    ICustomerEngagementRepository repository,
+    IRepository repository,
     IDomainEventDispatcher eventDispatcher)
     : ICommandHandler<CreateEngagementCommand, Guid>
 {

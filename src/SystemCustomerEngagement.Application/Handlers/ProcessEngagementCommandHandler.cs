@@ -6,7 +6,7 @@ using SystemCustomerEngagement.Domain.Repositories;
 namespace SystemCustomerEngagement.Application.Handlers;
 
 public sealed class ProcessEngagementCommandHandler(
-    ICustomerEngagementRepository repository,
+    IRepository repository,
     IDomainEventDispatcher eventDispatcher)
     : ICommandHandler<ProcessEngagementCommand>
 {

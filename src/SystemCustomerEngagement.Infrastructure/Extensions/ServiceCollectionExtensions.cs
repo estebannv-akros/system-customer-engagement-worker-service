@@ -16,7 +16,7 @@ public static class ServiceCollectionExtensions
         IConfiguration configuration)
     {
         // TODO: reemplazar por repositorio real cuando se integre persistencia
-        services.AddSingleton<ICustomerEngagementRepository, InMemoryCustomerEngagementRepository>();
+        services.AddSingleton<IRepository, Repository>();
 
         // Scoped porque depende de IPublishEndpoint que es scoped (contexto del consumer activo)
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
