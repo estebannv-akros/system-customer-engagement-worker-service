@@ -17,8 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SystemCustomerEngagement.Application\SystemCustomerEngagement.Application.csproj" />
-    <ProjectReference Include="..\SystemCustomerEngagement.Infrastructure\SystemCustomerEngagement.Infrastructure.csproj" />
+    <ProjectReference Include="..\SystemCustomerEngagement.Infrastructure\app.microservice.customer.engagement.infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\SystemCustomerEngagement.Application\SystemCustomerEngagement.Application.csproj" />
-	  <ProjectReference Include="..\SystemCustomerEngagement.Domain\SystemCustomerEngagement.Domain.csproj" />
+    <ProjectReference Include="..\SystemCustomerEngagement.Application\app.microservice.customer.engagement.application.csproj" />
+	  <ProjectReference Include="..\SystemCustomerEngagement.Domain\app.microservice.customer.engagement.domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

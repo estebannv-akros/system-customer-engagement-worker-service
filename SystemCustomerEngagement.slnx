@@ -1,9 +1,9 @@
 <Solution>
   <Folder Name="/src/">
     <File Path=".env" />
-    <Project Path="src/SystemCustomerEngagement.Application/SystemCustomerEngagement.Application.csproj" />
-    <Project Path="src/SystemCustomerEngagement.Domain/SystemCustomerEngagement.Domain.csproj" />
-    <Project Path="src/SystemCustomerEngagement.Infrastructure/SystemCustomerEngagement.Infrastructure.csproj" />
+    <Project Path="src/SystemCustomerEngagement.Application/app.microservice.customer.engagement.application.csproj" Id="ce917777-0b3a-e439-9c8f-19e48c0bbbbe" />
+    <Project Path="src/SystemCustomerEngagement.Domain/app.microservice.customer.engagement.domain.csproj" />
+    <Project Path="src/SystemCustomerEngagement.Infrastructure/app.microservice.customer.engagement.infrastructure.csproj" />
     <Project Path="src/SystemCustomerEngagement.Worker/app.microservice.customer.engagement.worker.csproj" />
   </Folder>
 </Solution>
