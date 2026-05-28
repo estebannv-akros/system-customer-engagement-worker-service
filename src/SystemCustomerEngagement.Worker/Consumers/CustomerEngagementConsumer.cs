@@ -1,5 +1,5 @@
 using MassTransit;
-using SystemCustomerEngagement.Domain.Interfaces;
+using SystemCustomerEngagement.Application.Interfaces;
 using SystemCustomerEngagement.Worker.Contracts;
 using SystemCustomerEngagement.Domain.Entities;
 using SystemCustomerEngagement.Domain.Exceptions;

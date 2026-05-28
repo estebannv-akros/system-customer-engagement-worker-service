@@ -3,6 +3,7 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Metrics;
+using SystemCustomerEngagement.Infrastructure.Extensions;
 using SystemCustomerEngagement.Worker.Extensions;
 
 Env.Load();
@@ -11,6 +12,7 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services
     .AddApplication()
+    .AddInfrastructure(builder.Configuration)
     .AddMassTransitWithRabbitMq(builder.Configuration);
 
 if (builder.Configuration.GetValue<bool>("Otlp:Enabled"))

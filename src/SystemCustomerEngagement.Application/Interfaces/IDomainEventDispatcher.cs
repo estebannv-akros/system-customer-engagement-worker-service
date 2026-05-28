@@ -1,6 +1,6 @@
 using SystemCustomerEngagement.Domain.Common;
 
-namespace SystemCustomerEngagement.Domain.Events;
+namespace SystemCustomerEngagement.Application.Interfaces;
 
 public interface IDomainEventDispatcher
 {

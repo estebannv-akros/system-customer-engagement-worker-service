@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\SystemCustomerEngagement.Domain\SystemCustomerEngagement.Domain.csproj" />
+    <ProjectReference Include="..\SystemCustomerEngagement.Application\SystemCustomerEngagement.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
