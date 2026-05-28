@@ -1,8 +1,7 @@
-using MassTransit;
-using AppMicroserviceCustomerEngagement.Worker.Contracts;
 using AppMicroserviceCustomerEngagement.Domain.Exceptions;
 using AppMicroserviceCustomerEngagement.Infrastructure.Messaging;
 using AppMicroserviceCustomerEngagement.Worker.Consumers;
+using MassTransit;
 
 namespace AppMicroserviceCustomerEngagement.Worker.Extensions;
 

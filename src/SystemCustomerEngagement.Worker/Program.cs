@@ -11,7 +11,6 @@ Env.Load();
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services
-    .AddApplication()
     .AddInfrastructure(builder.Configuration)
     .AddMassTransitWithRabbitMq(builder.Configuration);
 

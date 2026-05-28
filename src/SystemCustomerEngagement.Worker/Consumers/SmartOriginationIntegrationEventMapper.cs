@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Logging;
-using AppMicroserviceCustomerEngagement.Domain.Entities;
 using AppMicroserviceCustomerEngagement.Worker.Contracts;
 
 namespace AppMicroserviceCustomerEngagement.Worker.Consumers;
@@ -14,14 +12,6 @@ public static class SmartOriginationIntegrationEventMapper
 
         foreach (var msg in events)
         {
-            if (!Enum.TryParse<EngagementChannel>(msg.Channel, ignoreCase: true, out _))
-            {
-                logger.LogWarning(
-                    "Mensaje descartado — canal desconocido: '{Channel}'. CustomerId={CustomerId}",
-                    msg.Channel, msg.CustomerId);
-                continue;
-            }
-
             if (string.IsNullOrWhiteSpace(msg.Email) || string.IsNullOrWhiteSpace(msg.CurrentStep))
             {
                 logger.LogWarning(
