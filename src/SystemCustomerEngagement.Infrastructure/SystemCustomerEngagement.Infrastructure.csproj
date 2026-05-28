@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SystemCustomerEngagement.Application\SystemCustomerEngagement.Application.csproj" />
+	  <ProjectReference Include="..\SystemCustomerEngagement.Domain\SystemCustomerEngagement.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
