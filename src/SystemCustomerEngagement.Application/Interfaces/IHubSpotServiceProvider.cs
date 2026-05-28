@@ -1,6 +1,6 @@
 namespace SystemCustomerEngagement.Application.Interfaces;
 
-public interface IHubSpotClient
+public interface IHubSpotServiceProvider
 {
     Task UpsertContactsBatchAsync(
         IReadOnlyList<(string Email, string CurrentStep)> contacts,

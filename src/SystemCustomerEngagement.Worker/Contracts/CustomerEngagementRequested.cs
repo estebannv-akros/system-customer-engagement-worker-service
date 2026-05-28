@@ -1,10 +1,6 @@
 namespace SystemCustomerEngagement.Worker.Contracts;
 
-/// <summary>
-/// Comando de mensajería para solicitar la actualización de un contacto en HubSpot.
-/// Channel: "Email" | "Sms" | "Push" | "InApp"
-/// </summary>
-public record CustomerEngagementRequested
+public record CreditFlowStepIntegrationEvent
 {
     public Guid CorrelationId { get; init; }
     public DateTimeOffset Timestamp { get; init; }

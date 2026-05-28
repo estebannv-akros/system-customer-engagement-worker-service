@@ -1,6 +1,7 @@
 using SystemCustomerEngagement.Application.Commands;
 using SystemCustomerEngagement.Application.Common;
 using SystemCustomerEngagement.Application.Interfaces;
+using SystemCustomerEngagement.Domain.Entities;
 using SystemCustomerEngagement.Domain.Repositories;
 
 namespace SystemCustomerEngagement.Application.Handlers;

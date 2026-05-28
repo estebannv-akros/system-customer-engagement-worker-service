@@ -8,9 +8,14 @@ namespace SystemCustomerEngagement.Worker.Extensions;
 
 public static class MassTransitExtensions
 {
-    private const string EngagementsQueue   = "customer-engagement.engagements";
-    private const string NotificationsQueue = "customer-engagement.notifications";
-    private const string InteractionsQueue  = "customer-engagement.interactions";
+    private const string CreditOriginationQueue =
+        "customer_engagement_upsert_credit_origination_integration_event";
+
+    private const string SmartOriginationQueue =
+        "customer_engagement_upsert_smart_origination_integration_event";
+
+    private const string UpdateUserQueue =
+        "customer_engagement_upsert_user_registration_integration_event";
 
     public static IServiceCollection AddMassTransitWithRabbitMq(
         this IServiceCollection services,
@@ -18,7 +23,27 @@ public static class MassTransitExtensions
     {
         services.AddMassTransit(x =>
         {
-            x.AddConsumer<CustomerEngagementConsumer>(cfg =>
+            x.AddConsumer<CreditOriginationIntegrationEventHandler>(cfg =>
+            {
+                cfg.Options<BatchOptions>(b =>
+                {
+                    b.MessageLimit = 10;
+                    b.TimeLimit    = TimeSpan.FromSeconds(30);
+                    b.ConcurrencyLimit = 4;
+                });
+            });
+
+            x.AddConsumer<SmartOriginationIntegrationEventHandler>(cfg =>
+            {
+                cfg.Options<BatchOptions>(b =>
+                {
+                    b.MessageLimit = 10;
+                    b.TimeLimit    = TimeSpan.FromSeconds(30);
+                    b.ConcurrencyLimit = 4;
+                });
+            });
+
+            x.AddConsumer<UpdateUserIntegrationEventHandler>(cfg =>
             {
                 cfg.Options<BatchOptions>(b =>
                 {
@@ -30,10 +55,10 @@ public static class MassTransitExtensions
 
             x.UsingRabbitMq((context, cfg) =>
             {
-                var host     = configuration["RabbitMq:Host"]!;
-                var port     = configuration.GetValue<ushort>("RabbitMq:Port", 5671);
-                var vhost    = configuration["RabbitMq:VirtualHost"] ?? "/";
-                var useSsl   = configuration.GetValue<bool>("RabbitMq:UseSsl", true);
+                var host   = configuration["RabbitMq:Host"]!;
+                var port   = configuration.GetValue<ushort>("RabbitMq:Port", 5671);
+                var vhost  = configuration["RabbitMq:VirtualHost"] ?? "/";
+                var useSsl = configuration.GetValue<bool>("RabbitMq:UseSsl", true);
 
                 cfg.Host(host, port, vhost, h =>
                 {
@@ -44,8 +69,7 @@ public static class MassTransitExtensions
                         h.UseSsl(s => s.ServerName = host);
                 });
 
-                // Cola: engagements
-                cfg.ReceiveEndpoint(EngagementsQueue, e =>
+                cfg.ReceiveEndpoint(CreditOriginationQueue, e =>
                 {
                     e.SetQuorumQueue();
                     e.PrefetchCount = 40;
@@ -67,11 +91,10 @@ public static class MassTransitExtensions
                         TimeSpan.FromMinutes(2),
                         TimeSpan.FromMinutes(10)));
 
-                    e.ConfigureConsumer<CustomerEngagementConsumer>(context);
+                    e.ConfigureConsumer<CreditOriginationIntegrationEventHandler>(context);
                 });
 
-                // Cola: notifications
-                cfg.ReceiveEndpoint(NotificationsQueue, e =>
+                cfg.ReceiveEndpoint(SmartOriginationQueue, e =>
                 {
                     e.SetQuorumQueue();
                     e.PrefetchCount = 40;
@@ -93,11 +116,10 @@ public static class MassTransitExtensions
                         TimeSpan.FromMinutes(2),
                         TimeSpan.FromMinutes(10)));
 
-                    e.ConfigureConsumer<CustomerEngagementConsumer>(context);
+                    e.ConfigureConsumer<SmartOriginationIntegrationEventHandler>(context);
                 });
 
-                // Cola: interactions
-                cfg.ReceiveEndpoint(InteractionsQueue, e =>
+                cfg.ReceiveEndpoint(UpdateUserQueue, e =>
                 {
                     e.SetQuorumQueue();
                     e.PrefetchCount = 40;
@@ -119,7 +141,7 @@ public static class MassTransitExtensions
                         TimeSpan.FromMinutes(2),
                         TimeSpan.FromMinutes(10)));
 
-                    e.ConfigureConsumer<CustomerEngagementConsumer>(context);
+                    e.ConfigureConsumer<UpdateUserIntegrationEventHandler>(context);
                 });
             });
         });

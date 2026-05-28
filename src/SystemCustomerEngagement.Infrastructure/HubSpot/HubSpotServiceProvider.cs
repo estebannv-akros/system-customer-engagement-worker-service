@@ -7,9 +7,9 @@ using SystemCustomerEngagement.Domain.Exceptions;
 
 namespace SystemCustomerEngagement.Infrastructure.HubSpot;
 
-public sealed class HubSpotClient(
+public sealed class HubSpotServiceProvider(
     HttpClient httpClient,
-    ILogger<HubSpotClient> logger) : IHubSpotClient
+    ILogger<HubSpotServiceProvider> logger) : IHubSpotServiceProvider
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {

@@ -1,0 +1,38 @@
+using Microsoft.Extensions.Logging;
+using SystemCustomerEngagement.Domain.Entities;
+using SystemCustomerEngagement.Worker.Contracts;
+
+namespace SystemCustomerEngagement.Worker.Consumers;
+
+public static class UpdateUserIntegrationEventMapper
+{
+    public static IReadOnlyList<(string Email, string CurrentStep)> ToHubSpotContacts(
+        IEnumerable<UpdateUserIntegrationEvent> events,
+        ILogger logger)
+    {
+        var result = new List<(string, string)>();
+
+        foreach (var msg in events)
+        {
+            if (!Enum.TryParse<EngagementChannel>(msg.Channel, ignoreCase: true, out _))
+            {
+                logger.LogWarning(
+                    "Mensaje descartado — canal desconocido: '{Channel}'. CustomerId={CustomerId}",
+                    msg.Channel, msg.CustomerId);
+                continue;
+            }
+
+            if (string.IsNullOrWhiteSpace(msg.Email) || string.IsNullOrWhiteSpace(msg.CurrentStep))
+            {
+                logger.LogWarning(
+                    "Mensaje descartado — Email o CurrentStep vacío. CustomerId={CustomerId}",
+                    msg.CustomerId);
+                continue;
+            }
+
+            result.Add((msg.Email, msg.CurrentStep));
+        }
+
+        return result;
+    }
+}

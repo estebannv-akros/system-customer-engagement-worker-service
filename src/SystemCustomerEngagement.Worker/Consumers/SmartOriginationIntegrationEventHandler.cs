@@ -4,13 +4,13 @@ using SystemCustomerEngagement.Worker.Contracts;
 
 namespace SystemCustomerEngagement.Worker.Consumers;
 
-public sealed class CreditOriginationIntegrationEventHandler(
+public sealed class SmartOriginationIntegrationEventHandler(
     HubSpotServiceProvider hubspotServiceProvider,
-    ILogger<CreditOriginationIntegrationEventHandler> logger) : IConsumer<Batch<CreditFlowStepIntegrationEvent>>
+    ILogger<SmartOriginationIntegrationEventHandler> logger) : IConsumer<Batch<SmartOriginationIntegrationEvent>>
 {
-    public async Task Consume(ConsumeContext<Batch<CreditFlowStepIntegrationEvent>> context)
+    public async Task Consume(ConsumeContext<Batch<SmartOriginationIntegrationEvent>> context)
     {
-        var contacts = CreditOriginationIntegrationEventMapper.ToHubSpotContacts(
+        var contacts = SmartOriginationIntegrationEventMapper.ToHubSpotContacts(
             context.Message.Select(m => m.Message), logger);
 
         if (contacts.Count == 0)

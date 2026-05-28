@@ -21,7 +21,7 @@ public static class ServiceCollectionExtensions
         // Scoped porque depende de IPublishEndpoint que es scoped (contexto del consumer activo)
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
 
-        services.AddHttpClient<IHubSpotClient, HubSpotClient>(client =>
+        services.AddHttpClient<IHubSpotServiceProvider, HubSpotServiceProvider>(client =>
         {
             client.BaseAddress = new Uri(configuration["HubSpot:BaseUrl"]!);
             client.DefaultRequestHeaders.Authorization =

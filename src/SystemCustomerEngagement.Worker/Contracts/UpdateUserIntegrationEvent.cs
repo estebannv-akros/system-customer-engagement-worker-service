@@ -1,6 +1,6 @@
-namespace SystemCustomerEngagement.Contracts.V1;
+namespace SystemCustomerEngagement.Worker.Contracts;
 
-public record CreditFlowStepIntegrationEvent
+public record UpdateUserIntegrationEvent
 {
     public Guid CorrelationId { get; init; }
     public DateTimeOffset Timestamp { get; init; }
