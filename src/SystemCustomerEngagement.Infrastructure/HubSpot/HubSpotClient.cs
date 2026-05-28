@@ -2,7 +2,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
-using SystemCustomerEngagement.Application.Interfaces;
+using SystemCustomerEngagement.Domain.Interfaces;
 using SystemCustomerEngagement.Domain.Exceptions;
 
 namespace SystemCustomerEngagement.Infrastructure.HubSpot;

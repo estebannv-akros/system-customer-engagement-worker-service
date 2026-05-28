@@ -1,4 +1,4 @@
-namespace SystemCustomerEngagement.Application.Interfaces;
+namespace SystemCustomerEngagement.Domain.Interfaces;
 
 public interface IHubSpotClient
 {

@@ -1,6 +1,6 @@
 using MassTransit;
 using Microsoft.Extensions.Logging;
-using SystemCustomerEngagement.Application.Interfaces;
+using SystemCustomerEngagement.Domain.Events;
 using SystemCustomerEngagement.Domain.Common;
 
 namespace SystemCustomerEngagement.Infrastructure.Messaging;

@@ -1,7 +1,8 @@
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using SystemCustomerEngagement.Application.Interfaces;
+using SystemCustomerEngagement.Domain.Events;
+using SystemCustomerEngagement.Domain.Interfaces;
 using SystemCustomerEngagement.Domain.Repositories;
 using SystemCustomerEngagement.Infrastructure.HubSpot;
 using SystemCustomerEngagement.Infrastructure.Messaging;
