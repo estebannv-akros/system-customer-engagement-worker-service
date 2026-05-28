@@ -1,9 +1,9 @@
 using MassTransit;
 using Microsoft.Extensions.Logging;
-using SystemCustomerEngagement.Application.Interfaces;
-using SystemCustomerEngagement.Domain.Common;
+using AppMicroserviceCustomerEngagement.Application.Interfaces;
+using AppMicroserviceCustomerEngagement.Domain.Common;
 
-namespace SystemCustomerEngagement.Infrastructure.Messaging;
+namespace AppMicroserviceCustomerEngagement.Infrastructure.Messaging;
 
 public sealed class DomainEventDispatcher(
     IPublishEndpoint publishEndpoint,

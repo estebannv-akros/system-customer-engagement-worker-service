@@ -1,10 +1,10 @@
 using MassTransit;
-using SystemCustomerEngagement.Worker.Contracts;
-using SystemCustomerEngagement.Domain.Exceptions;
-using SystemCustomerEngagement.Infrastructure.Messaging;
-using SystemCustomerEngagement.Worker.Consumers;
+using AppMicroserviceCustomerEngagement.Worker.Contracts;
+using AppMicroserviceCustomerEngagement.Domain.Exceptions;
+using AppMicroserviceCustomerEngagement.Infrastructure.Messaging;
+using AppMicroserviceCustomerEngagement.Worker.Consumers;
 
-namespace SystemCustomerEngagement.Worker.Extensions;
+namespace AppMicroserviceCustomerEngagement.Worker.Extensions;
 
 public static class MassTransitExtensions
 {

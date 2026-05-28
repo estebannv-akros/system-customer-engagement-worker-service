@@ -3,8 +3,8 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Metrics;
-using SystemCustomerEngagement.Infrastructure.Extensions;
-using SystemCustomerEngagement.Worker.Extensions;
+using AppMicroserviceCustomerEngagement.Infrastructure.Extensions;
+using AppMicroserviceCustomerEngagement.Worker.Extensions;
 
 Env.Load();
 

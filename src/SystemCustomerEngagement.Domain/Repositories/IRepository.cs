@@ -1,6 +1,6 @@
-using SystemCustomerEngagement.Domain.Entities;
+using AppMicroserviceCustomerEngagement.Domain.Entities;
 
-namespace SystemCustomerEngagement.Domain.Repositories;
+namespace AppMicroserviceCustomerEngagement.Domain.Repositories;
 
 public interface IRepository
 {

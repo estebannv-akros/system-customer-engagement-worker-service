@@ -2,7 +2,7 @@ using System.Diagnostics;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 
-namespace SystemCustomerEngagement.Infrastructure.Messaging;
+namespace AppMicroserviceCustomerEngagement.Infrastructure.Messaging;
 
 public sealed class LoggingFilter<T>(ILogger<LoggingFilter<T>> logger) : IFilter<ConsumeContext<T>>
     where T : class

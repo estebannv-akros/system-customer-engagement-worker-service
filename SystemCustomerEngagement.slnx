@@ -4,6 +4,6 @@
     <Project Path="src/SystemCustomerEngagement.Application/SystemCustomerEngagement.Application.csproj" />
     <Project Path="src/SystemCustomerEngagement.Domain/SystemCustomerEngagement.Domain.csproj" />
     <Project Path="src/SystemCustomerEngagement.Infrastructure/SystemCustomerEngagement.Infrastructure.csproj" />
-    <Project Path="src/SystemCustomerEngagement.Worker/SystemCustomerEngagement.Worker.csproj" />
+    <Project Path="src/SystemCustomerEngagement.Worker/app.microservice.customer.engagement.worker.csproj" />
   </Folder>
 </Solution>

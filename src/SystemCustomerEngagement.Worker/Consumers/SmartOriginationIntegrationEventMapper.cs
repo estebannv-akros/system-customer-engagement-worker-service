@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging;
-using SystemCustomerEngagement.Domain.Entities;
-using SystemCustomerEngagement.Worker.Contracts;
+using AppMicroserviceCustomerEngagement.Domain.Entities;
+using AppMicroserviceCustomerEngagement.Worker.Contracts;
 
-namespace SystemCustomerEngagement.Worker.Consumers;
+namespace AppMicroserviceCustomerEngagement.Worker.Consumers;
 
 public static class SmartOriginationIntegrationEventMapper
 {

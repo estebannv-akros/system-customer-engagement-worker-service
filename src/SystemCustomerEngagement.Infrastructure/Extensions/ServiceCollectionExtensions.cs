@@ -1,9 +1,9 @@
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using SystemCustomerEngagement.Infrastructure.HubSpot;
+using AppMicroserviceCustomerEngagement.Infrastructure.HubSpot;
 
-namespace SystemCustomerEngagement.Infrastructure.Extensions;
+namespace AppMicroserviceCustomerEngagement.Infrastructure.Extensions;
 
 public static class ServiceCollectionExtensions
 {

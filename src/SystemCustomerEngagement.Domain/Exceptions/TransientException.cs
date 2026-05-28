@@ -1,4 +1,4 @@
-namespace SystemCustomerEngagement.Domain.Exceptions;
+namespace AppMicroserviceCustomerEngagement.Domain.Exceptions;
 
 /// <summary>
 /// Señala un error reintentable: deadlocks, timeouts cortos, rate limits, dependencias temporalmente caídas.

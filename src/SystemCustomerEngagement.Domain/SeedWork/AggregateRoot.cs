@@ -1,4 +1,4 @@
-namespace SystemCustomerEngagement.Domain.Common;
+namespace AppMicroserviceCustomerEngagement.Domain.Common;
 
 public abstract class AggregateRoot : Entity
 {

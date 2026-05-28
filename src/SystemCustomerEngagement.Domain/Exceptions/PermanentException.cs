@@ -1,4 +1,4 @@
-namespace SystemCustomerEngagement.Domain.Exceptions;
+namespace AppMicroserviceCustomerEngagement.Domain.Exceptions;
 
 /// <summary>
 /// Señala un error no reintentable: payload inválido, dato corrupto, rechazo 4xx.

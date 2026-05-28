@@ -1,8 +1,8 @@
 using MassTransit;
-using SystemCustomerEngagement.Infrastructure.HubSpot;
-using SystemCustomerEngagement.Worker.Contracts;
+using AppMicroserviceCustomerEngagement.Infrastructure.HubSpot;
+using AppMicroserviceCustomerEngagement.Worker.Contracts;
 
-namespace SystemCustomerEngagement.Worker.Consumers;
+namespace AppMicroserviceCustomerEngagement.Worker.Consumers;
 
 public sealed class UpdateUserIntegrationEventHandler(
     HubSpotServiceProvider hubspotServiceProvider,

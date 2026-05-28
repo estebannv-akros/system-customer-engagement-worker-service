@@ -1,4 +1,4 @@
-namespace SystemCustomerEngagement.Application.Interfaces;
+namespace AppMicroserviceCustomerEngagement.Application.Interfaces;
 
 public interface IHubSpotServiceProvider
 {

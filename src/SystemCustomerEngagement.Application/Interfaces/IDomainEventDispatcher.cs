@@ -1,6 +1,6 @@
-using SystemCustomerEngagement.Domain.Common;
+using AppMicroserviceCustomerEngagement.Domain.Common;
 
-namespace SystemCustomerEngagement.Application.Interfaces;
+namespace AppMicroserviceCustomerEngagement.Application.Interfaces;
 
 public interface IDomainEventDispatcher
 {

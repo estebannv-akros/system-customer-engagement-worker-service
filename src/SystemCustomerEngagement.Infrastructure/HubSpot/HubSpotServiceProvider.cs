@@ -2,10 +2,10 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
-using SystemCustomerEngagement.Application.Interfaces;
-using SystemCustomerEngagement.Domain.Exceptions;
+using AppMicroserviceCustomerEngagement.Application.Interfaces;
+using AppMicroserviceCustomerEngagement.Domain.Exceptions;
 
-namespace SystemCustomerEngagement.Infrastructure.HubSpot;
+namespace AppMicroserviceCustomerEngagement.Infrastructure.HubSpot;
 
 public sealed class HubSpotServiceProvider(
     HttpClient httpClient,

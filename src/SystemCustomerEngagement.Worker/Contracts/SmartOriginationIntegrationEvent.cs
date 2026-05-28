@@ -1,4 +1,4 @@
-namespace SystemCustomerEngagement.Worker.Contracts;
+namespace AppMicroserviceCustomerEngagement.Worker.Contracts;
 
 public record SmartOriginationIntegrationEvent
 {
