@@ -1,9 +1,9 @@
+using app.microservice.customer.engagement.worker.Consumers;
+using app.microservice.customer.engagement.worker.Contracts.CreditOrigination;
+using app.microservice.customer.engagement.worker.Contracts.SmartOrigination;
 using AppMicroserviceCustomerEngagement.Domain.Exceptions;
 using AppMicroserviceCustomerEngagement.Infrastructure.Messaging;
 using MassTransit;
-using app.microservice.customer.engagement.worker.Contracts;
-using app.microservice.customer.engagement.worker.Consumers;
-using app.microservice.customer.engagement.worker.Contracts.CreditOrigination;
 
 namespace AppMicroserviceCustomerEngagement.Worker.Extensions;
 
@@ -29,7 +29,7 @@ public static class MassTransitExtensions
                 cfg.Options<BatchOptions>(b =>
                 {
                     b.MessageLimit = 10;
-                    b.TimeLimit    = TimeSpan.FromSeconds(30);
+                    b.TimeLimit = TimeSpan.FromSeconds(30);
                     b.ConcurrencyLimit = 4;
                 });
             });
@@ -39,7 +39,7 @@ public static class MassTransitExtensions
                 cfg.Options<BatchOptions>(b =>
                 {
                     b.MessageLimit = 10;
-                    b.TimeLimit    = TimeSpan.FromSeconds(30);
+                    b.TimeLimit = TimeSpan.FromSeconds(30);
                     b.ConcurrencyLimit = 4;
                 });
             });
@@ -49,16 +49,16 @@ public static class MassTransitExtensions
                 cfg.Options<BatchOptions>(b =>
                 {
                     b.MessageLimit = 10;
-                    b.TimeLimit    = TimeSpan.FromSeconds(30);
+                    b.TimeLimit = TimeSpan.FromSeconds(30);
                     b.ConcurrencyLimit = 4;
                 });
             });
 
             x.UsingRabbitMq((context, cfg) =>
             {
-                var host   = configuration["RabbitMq:Host"]!;
-                var port   = configuration.GetValue<ushort>("RabbitMq:Port", 5671);
-                var vhost  = configuration["RabbitMq:VirtualHost"] ?? "/";
+                var host = configuration["RabbitMq:Host"]!;
+                var port = configuration.GetValue<ushort>("RabbitMq:Port", 5671);
+                var vhost = configuration["RabbitMq:VirtualHost"] ?? "/";
                 var useSsl = configuration.GetValue<bool>("RabbitMq:UseSsl", true);
 
                 cfg.Host(host, port, vhost, h =>
@@ -96,9 +96,6 @@ public static class MassTransitExtensions
                     {
                         b.MessageLimit = 20;
                         b.TimeLimit = TimeSpan.FromSeconds(5);
-
-                        // Resolviendo desde el container
-                        //b.Consumer(() => context.GetRequiredService<CreditOriginationConsumer>());
                     });
 
                     e.ConfigureConsumer<CreditOriginationConsumer>(context);
@@ -126,6 +123,12 @@ public static class MassTransitExtensions
                         TimeSpan.FromMinutes(2),
                         TimeSpan.FromMinutes(10)));
 
+                    e.Batch<SmartOriginationIntegrationEvent>(b =>
+                    {
+                        b.MessageLimit = 20;
+                        b.TimeLimit = TimeSpan.FromSeconds(5);
+                    });
+
                     e.ConfigureConsumer<SmartOriginationConsumer>(context);
                 });
 
@@ -150,6 +153,12 @@ public static class MassTransitExtensions
                         TimeSpan.FromSeconds(30),
                         TimeSpan.FromMinutes(2),
                         TimeSpan.FromMinutes(10)));
+
+                    e.Batch<UserOriginationConsumer>(b =>
+                    {
+                        b.MessageLimit = 20;
+                        b.TimeLimit = TimeSpan.FromSeconds(5);
+                    });
 
                     e.ConfigureConsumer<UserOriginationConsumer>(context);
                 });
