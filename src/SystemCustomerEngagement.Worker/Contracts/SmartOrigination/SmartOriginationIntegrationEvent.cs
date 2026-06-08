@@ -1,6 +1,9 @@
-namespace app.microservice.customer.engagement.worker.Consumers.UpdateUser;
+using MassTransit;
 
-public record UpdateUserIntegrationEvent
+namespace app.microservice.customer.engagement.worker.Contracts.SmartOrigination;
+
+[EntityName("smart-origination-integration-event")]
+public record SmartOriginationIntegrationEvent
 {
     public Guid CorrelationId { get; init; }
     public DateTimeOffset Timestamp { get; init; }

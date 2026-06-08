@@ -1,16 +1,15 @@
-namespace app.microservice.customer.engagement.worker.Consumers.CreditOrigination;
+namespace app.microservice.customer.engagement.worker.Contracts.SmartOrigination;
 
-public static class CreditOriginationIntegrationEventMapper
+public static class SmartOriginationIntegrationEventMapper
 {
     public static IReadOnlyList<(string Email, string CurrentStep)> ToHubSpotContacts(
-        IEnumerable<CreditOriginationIntegrationEvent> events,
+        IEnumerable<SmartOriginationIntegrationEvent> events,
         ILogger logger)
     {
         var result = new List<(string, string)>();
 
         foreach (var msg in events)
         {
-
             if (string.IsNullOrWhiteSpace(msg.Email) || string.IsNullOrWhiteSpace(msg.CurrentStep))
             {
                 logger.LogWarning(

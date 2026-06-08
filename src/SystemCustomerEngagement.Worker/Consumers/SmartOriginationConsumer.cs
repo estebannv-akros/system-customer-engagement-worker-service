@@ -1,10 +1,11 @@
 using MassTransit;
-using AppMicroserviceCustomerEngagement.Infrastructure.HubSpot;
+using AppMicroserviceCustomerEngagement.Application.Interfaces;
+using app.microservice.customer.engagement.worker.Contracts.SmartOrigination;
 
-namespace app.microservice.customer.engagement.worker.Consumers.SmartOrigination;
+namespace app.microservice.customer.engagement.worker.Consumers;
 
 public sealed class SmartOriginationConsumer(
-    HubSpotServiceProvider hubspotServiceProvider,
+    IHubSpotServiceProvider hubspotServiceProvider,
     ILogger<SmartOriginationConsumer> logger) : IConsumer<Batch<SmartOriginationIntegrationEvent>>
 {
     public async Task Consume(ConsumeContext<Batch<SmartOriginationIntegrationEvent>> context)

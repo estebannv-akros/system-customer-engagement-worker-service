@@ -1,9 +1,9 @@
-using app.microservice.customer.engagement.worker.Consumers.CreditOrigination;
-using app.microservice.customer.engagement.worker.Consumers.SmartOrigination;
-using app.microservice.customer.engagement.worker.Consumers.UpdateUser;
 using AppMicroserviceCustomerEngagement.Domain.Exceptions;
 using AppMicroserviceCustomerEngagement.Infrastructure.Messaging;
 using MassTransit;
+using app.microservice.customer.engagement.worker.Contracts;
+using app.microservice.customer.engagement.worker.Consumers;
+using app.microservice.customer.engagement.worker.Contracts.CreditOrigination;
 
 namespace AppMicroserviceCustomerEngagement.Worker.Extensions;
 
@@ -15,7 +15,7 @@ public static class MassTransitExtensions
     private const string SmartOriginationQueue =
         "customer_engagement_upsert_smart_origination_integration_event";
 
-    private const string UpdateUserQueue =
+    private const string UserOriginationQueue =
         "customer_engagement_upsert_user_registration_integration_event";
 
     public static IServiceCollection AddMassTransitWithRabbitMq(
@@ -44,7 +44,7 @@ public static class MassTransitExtensions
                 });
             });
 
-            x.AddConsumer<UpdateUserConsumer>(cfg =>
+            x.AddConsumer<UserOriginationConsumer>(cfg =>
             {
                 cfg.Options<BatchOptions>(b =>
                 {
@@ -92,6 +92,15 @@ public static class MassTransitExtensions
                         TimeSpan.FromMinutes(2),
                         TimeSpan.FromMinutes(10)));
 
+                    e.Batch<CreditOriginationIntegrationEvent>(b =>
+                    {
+                        b.MessageLimit = 20;
+                        b.TimeLimit = TimeSpan.FromSeconds(5);
+
+                        // Resolviendo desde el container
+                        //b.Consumer(() => context.GetRequiredService<CreditOriginationConsumer>());
+                    });
+
                     e.ConfigureConsumer<CreditOriginationConsumer>(context);
                 });
 
@@ -120,7 +129,7 @@ public static class MassTransitExtensions
                     e.ConfigureConsumer<SmartOriginationConsumer>(context);
                 });
 
-                cfg.ReceiveEndpoint(UpdateUserQueue, e =>
+                cfg.ReceiveEndpoint(UserOriginationQueue, e =>
                 {
                     e.SetQuorumQueue();
                     e.PrefetchCount = 40;
@@ -142,7 +151,7 @@ public static class MassTransitExtensions
                         TimeSpan.FromMinutes(2),
                         TimeSpan.FromMinutes(10)));
 
-                    e.ConfigureConsumer<UpdateUserConsumer>(context);
+                    e.ConfigureConsumer<UserOriginationConsumer>(context);
                 });
             });
         });

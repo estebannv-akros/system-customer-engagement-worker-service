@@ -1,10 +1,12 @@
 using MassTransit;
-using AppMicroserviceCustomerEngagement.Infrastructure.HubSpot;
+using AppMicroserviceCustomerEngagement.Application.Interfaces;
+using app.microservice.customer.engagement.worker.Contracts;
+using app.microservice.customer.engagement.worker.Contracts.CreditOrigination;
 
-namespace app.microservice.customer.engagement.worker.Consumers.CreditOrigination;
+namespace app.microservice.customer.engagement.worker.Consumers;
 
 public sealed class CreditOriginationConsumer(
-    HubSpotServiceProvider hubspotServiceProvider,
+    IHubSpotServiceProvider hubspotServiceProvider,
     ILogger<CreditOriginationConsumer> logger) : IConsumer<Batch<CreditOriginationIntegrationEvent>>
 {
     public async Task Consume(ConsumeContext<Batch<CreditOriginationIntegrationEvent>> context)

@@ -1,9 +1,9 @@
-namespace app.microservice.customer.engagement.worker.Consumers.SmartOrigination;
+namespace app.microservice.customer.engagement.worker.Contracts.UserOrigination;
 
-public static class SmartOriginationIntegrationEventMapper
+public static class UserOriginationIntegrationEventMapper
 {
     public static IReadOnlyList<(string Email, string CurrentStep)> ToHubSpotContacts(
-        IEnumerable<SmartOriginationIntegrationEvent> events,
+        IEnumerable<UserOriginationIntegrationEvent> events,
         ILogger logger)
     {
         var result = new List<(string, string)>();

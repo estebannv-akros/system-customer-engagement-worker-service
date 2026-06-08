@@ -2,7 +2,7 @@ using AppMicroserviceCustomerEngagement.Application.Interfaces;
 
 namespace AppMicroserviceCustomerEngagement.Application.UseCases;
 
-public sealed class UpdateUserIntegrationEventHandler(IHubSpotServiceProvider hubSpotServiceProvider)
+public sealed class UserOriginationIntegrationEventHandler(IHubSpotServiceProvider hubSpotServiceProvider)
 {
     public async Task ExecuteAsync(
         IReadOnlyList<(string Email, string CurrentStep)> contacts,

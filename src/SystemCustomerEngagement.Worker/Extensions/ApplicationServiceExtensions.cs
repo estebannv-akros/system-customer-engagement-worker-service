@@ -8,7 +8,7 @@ public static class ApplicationServiceExtensions
     {
         services.AddScoped<CreditOriginationIntegrationEventHandler>();
         services.AddScoped<SmartOriginationIntegrationEventHandler>();
-        services.AddScoped<UpdateUserIntegrationEventHandler>();
+        services.AddScoped<UserOriginationIntegrationEventHandler>();
         return services;
     }
 }
