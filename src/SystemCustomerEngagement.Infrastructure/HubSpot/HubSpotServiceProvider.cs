@@ -1,9 +1,9 @@
+using AppMicroserviceCustomerEngagement.Application.Interfaces;
+using AppMicroserviceCustomerEngagement.Application.Models;
+using AppMicroserviceCustomerEngagement.Domain.Exceptions;
+using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using Microsoft.Extensions.Logging;
-using AppMicroserviceCustomerEngagement.Application.Interfaces;
-using AppMicroserviceCustomerEngagement.Domain.Exceptions;
 
 namespace AppMicroserviceCustomerEngagement.Infrastructure.HubSpot;
 
@@ -17,24 +17,23 @@ public sealed class HubSpotServiceProvider(
     };
 
     public async Task UpsertContactsBatchAsync(
-        IReadOnlyList<(string Email, string CurrentStep)> contacts,
+        IReadOnlyList<HubSpotContact> contacts,
+        string flow,
         CancellationToken cancellationToken = default)
     {
-        var inputs = contacts.Select(c => new UpsertInput(
-            IdProperty: "email",
-            Id: c.Email,
-            Properties: new Dictionary<string, string>
-            {
-                ["email"]       = c.Email,
-                ["paso_actual"] = c.CurrentStep
-            }));
-
-        var request = new BatchUpsertRequest(inputs);
-
-        logger.LogDebug("HubSpot upsert batch Count={Count}", contacts.Count);
+        var request = new {
+            inputs = contacts.Select(i => new {
+                id = i.CustomerId ?? i.Email,
+                idProperty = i.CustomerId is null ? "email" : string.Empty,
+                properties = new Dictionary<string, string>
+                {
+                    [flow] = i.CurrentStep,
+                }
+            })
+        };
 
         var response = await httpClient.PostAsJsonAsync(
-            "/crm/v3/objects/contacts/batch/upsert",
+            "/crm/objects/2026-03/contacts/batch/update",
             request,
             JsonOptions,
             cancellationToken);
@@ -54,12 +53,4 @@ public sealed class HubSpotServiceProvider(
 
         throw new PermanentException($"HubSpot rechazó la solicitud {statusCode}. Body: {body}");
     }
-
-    private sealed record BatchUpsertRequest(
-        [property: JsonPropertyName("inputs")] IEnumerable<UpsertInput> Inputs);
-
-    private sealed record UpsertInput(
-        [property: JsonPropertyName("idProperty")] string IdProperty,
-        [property: JsonPropertyName("id")] string Id,
-        [property: JsonPropertyName("properties")] Dictionary<string, string> Properties);
 }

@@ -1,18 +1,16 @@
-using MassTransit;
-using AppMicroserviceCustomerEngagement.Application.Interfaces;
 using app.microservice.customer.engagement.worker.Contracts;
-using app.microservice.customer.engagement.worker.Contracts.CreditOrigination;
+using AppMicroserviceCustomerEngagement.Application.UseCases;
+using MassTransit;
 
 namespace app.microservice.customer.engagement.worker.Consumers;
 
 public sealed class CreditOriginationConsumer(
-    IHubSpotServiceProvider hubspotServiceProvider,
+    CreditOriginationIntegrationEventHandler handler,
     ILogger<CreditOriginationConsumer> logger) : IConsumer<Batch<CreditOriginationIntegrationEvent>>
 {
     public async Task Consume(ConsumeContext<Batch<CreditOriginationIntegrationEvent>> context)
     {
-        var contacts = CreditOriginationIntegrationEventMapper.ToHubSpotContacts(
-            context.Message.Select(m => m.Message), logger);
+        var contacts = context.Message.Select(m => m.Message).ToList();
 
         if (contacts.Count == 0)
         {
@@ -22,7 +20,7 @@ public sealed class CreditOriginationConsumer(
 
         logger.LogInformation("Procesando batch hacia HubSpot. Count={Count}", contacts.Count);
 
-        await hubspotServiceProvider.UpsertContactsBatchAsync(contacts, context.CancellationToken);
+        await handler.ExecuteAsync(contacts, context.CancellationToken);
 
         logger.LogInformation("Batch enviado a HubSpot. Count={Count}", contacts.Count);
     }

@@ -1,6 +1,5 @@
 using app.microservice.customer.engagement.worker.Consumers;
-using app.microservice.customer.engagement.worker.Contracts.CreditOrigination;
-using app.microservice.customer.engagement.worker.Contracts.SmartOrigination;
+using app.microservice.customer.engagement.worker.Contracts;
 using AppMicroserviceCustomerEngagement.Domain.Exceptions;
 using AppMicroserviceCustomerEngagement.Infrastructure.Messaging;
 using MassTransit;

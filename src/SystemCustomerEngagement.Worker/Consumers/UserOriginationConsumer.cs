@@ -1,17 +1,16 @@
+using app.microservice.customer.engagement.worker.Contracts;
+using AppMicroserviceCustomerEngagement.Application.UseCases;
 using MassTransit;
-using AppMicroserviceCustomerEngagement.Application.Interfaces;
-using app.microservice.customer.engagement.worker.Contracts.UserOrigination;
 
 namespace app.microservice.customer.engagement.worker.Consumers;
 
 public sealed class UserOriginationConsumer(
-    IHubSpotServiceProvider hubspotServiceProvider,
+    UserOriginationIntegrationEventHandler handler,
     ILogger<UserOriginationConsumer> logger) : IConsumer<Batch<UserOriginationIntegrationEvent>>
 {
     public async Task Consume(ConsumeContext<Batch<UserOriginationIntegrationEvent>> context)
     {
-        var contacts = UserOriginationIntegrationEventMapper.ToHubSpotContacts(
-            context.Message.Select(m => m.Message), logger);
+        var contacts = context.Message.Select(m => m.Message).ToList();
 
         if (contacts.Count == 0)
         {
@@ -21,7 +20,7 @@ public sealed class UserOriginationConsumer(
 
         logger.LogInformation("Procesando batch hacia HubSpot. Count={Count}", contacts.Count);
 
-        await hubspotServiceProvider.UpsertContactsBatchAsync(contacts, context.CancellationToken);
+        await handler.ExecuteAsync(contacts, context.CancellationToken);
 
         logger.LogInformation("Batch enviado a HubSpot. Count={Count}", contacts.Count);
     }
