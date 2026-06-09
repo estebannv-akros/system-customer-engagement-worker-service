@@ -11,11 +11,6 @@ public sealed class HubSpotServiceProvider(
     HttpClient httpClient,
     ILogger<HubSpotServiceProvider> logger) : IHubSpotServiceProvider
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
-
     public async Task UpsertContactsBatchAsync(
         IReadOnlyList<HubSpotContact> contacts,
         string flow,
@@ -23,11 +18,11 @@ public sealed class HubSpotServiceProvider(
     {
         var request = new {
             inputs = contacts.Select(i => new {
-                id = i.CustomerId ?? i.Email,
-                idProperty = i.CustomerId is null ? "email" : string.Empty,
+                id = i.Email,
+                idProperty = "email",
                 properties = new Dictionary<string, string>
                 {
-                    [flow] = i.CurrentStep,
+                    [flow] = i.Message,
                 }
             })
         };
@@ -35,7 +30,6 @@ public sealed class HubSpotServiceProvider(
         var response = await httpClient.PostAsJsonAsync(
             "/crm/objects/2026-03/contacts/batch/update",
             request,
-            JsonOptions,
             cancellationToken);
 
         if (response.IsSuccessStatusCode)
