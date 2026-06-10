@@ -6,4 +6,5 @@ public record HubSpotContact
     public DateTimeOffset Timestamp { get; init; }
     public string Email { get; init; } = default!;
     public string Message { get; init; } = default!;
+    public int BrandId { get; init; }
 }

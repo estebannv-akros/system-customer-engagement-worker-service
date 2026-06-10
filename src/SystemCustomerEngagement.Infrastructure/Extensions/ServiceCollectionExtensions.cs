@@ -1,4 +1,3 @@
-using System.Net.Http.Headers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using AppMicroserviceCustomerEngagement.Application.Interfaces;
@@ -12,11 +11,11 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        services.AddSingleton<IHubSpotAccessTokenProvider, HubSpotAccessTokenProvider>();
+
         services.AddHttpClient<IHubSpotServiceProvider, HubSpotServiceProvider>(client =>
         {
             client.BaseAddress = new Uri(configuration["HubSpot:BaseUrl"]!);
-            client.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", configuration["HubSpot:AccessToken"]!);
         });
 
         return services;
