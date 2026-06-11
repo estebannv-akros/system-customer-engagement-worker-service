@@ -1,3 +1,4 @@
+using AppMicroserviceCustomerEngagement.Domain.Constants;
 using AppMicroserviceCustomerEngagement.Application.Interfaces;
 using AppMicroserviceCustomerEngagement.Domain.Exceptions;
 using Microsoft.Extensions.Configuration;
@@ -12,7 +13,7 @@ public sealed class HubSpotAccessTokenProvider(IConfiguration configuration) : I
 
         if (string.IsNullOrWhiteSpace(token))
             throw new PermanentException(
-                $"No hay AccessToken de HubSpot configurado para BrandId {brandId} (CR=5, SV=7, GT=10, MX=12).");
+                $"No hay AccessToken de HubSpot configurado para BrandId {brandId}. Países: {string.Join(", ", HubSpotCountries.All.Select(c => $"{c.Code.ToUpperInvariant()}={c.BrandId}"))}.");
 
         return token;
     }

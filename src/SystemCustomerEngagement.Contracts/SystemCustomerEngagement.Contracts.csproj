@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SystemCustomerEngagement.Domain\app.microservice.customer.engagement.domain.csproj" />
+    <PackageReference Include="MassTransit.Abstractions" Version="8.5.9" />
+  </ItemGroup>
+
 </Project>

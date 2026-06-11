@@ -1,20 +1,22 @@
 using app.microservice.customer.engagement.worker.Consumers;
-using app.microservice.customer.engagement.worker.Contracts;
+using AppMicroserviceCustomerEngagement.Domain.Constants;
 using AppMicroserviceCustomerEngagement.Domain.Exceptions;
 using AppMicroserviceCustomerEngagement.Infrastructure.Messaging;
 using MassTransit;
+using RabbitMQ.Client;
+using app.microservice.customer.engagement.worker.Contracts;
 
 namespace AppMicroserviceCustomerEngagement.Worker.Extensions;
 
 public static class MassTransitExtensions
 {
-    private const string CreditOriginationQueue =
+    public const string CreditOriginationQueueBase =
         "customer_engagement_upsert_credit_origination_integration_event";
 
-    private const string SmartOriginationQueue =
+    public const string SmartOriginationQueueBase =
         "customer_engagement_upsert_smart_origination_integration_event";
 
-    private const string UserOriginationQueue =
+    public const string UserOriginationQueueBase =
         "customer_engagement_upsert_user_registration_integration_event";
 
     public static IServiceCollection AddMassTransitWithRabbitMq(
@@ -69,101 +71,73 @@ public static class MassTransitExtensions
                         h.UseSsl(s => s.ServerName = host);
                 });
 
-                cfg.ReceiveEndpoint(CreditOriginationQueue, e =>
+                ConfigurePublishTopology<CreditOriginationIntegrationEvent>(cfg);
+                ConfigurePublishTopology<SmartOriginationIntegrationEvent>(cfg);
+                ConfigurePublishTopology<UserOriginationIntegrationEvent>(cfg);
+
+                foreach (var country in HubSpotCountries.All)
                 {
-                    e.SetQuorumQueue();
-                    e.PrefetchCount = 40;
-                    e.UseConsumeFilter(typeof(LoggingFilter<>), context);
+                    ConfigureCountryEndpoint<CreditOriginationIntegrationEvent, CreditOriginationConsumer>(
+                        cfg, context, CreditOriginationQueueBase, country.Code);
 
-                    e.UseMessageRetry(r =>
-                    {
-                        r.Exponential(
-                            retryLimit: 3,
-                            minInterval: TimeSpan.FromMilliseconds(100),
-                            maxInterval: TimeSpan.FromSeconds(2),
-                            intervalDelta: TimeSpan.FromMilliseconds(200));
+                    ConfigureCountryEndpoint<SmartOriginationIntegrationEvent, SmartOriginationConsumer>(
+                        cfg, context, SmartOriginationQueueBase, country.Code);
 
-                        r.Ignore<PermanentException>();
-                    });
-
-                    e.UseDelayedRedelivery(r => r.Intervals(
-                        TimeSpan.FromSeconds(30),
-                        TimeSpan.FromMinutes(2),
-                        TimeSpan.FromMinutes(10)));
-
-                    e.Batch<CreditOriginationIntegrationEvent>(b =>
-                    {
-                        b.MessageLimit = 20;
-                        b.TimeLimit = TimeSpan.FromSeconds(5);
-                    });
-
-                    e.ConfigureConsumer<CreditOriginationConsumer>(context);
-                });
-
-                cfg.ReceiveEndpoint(SmartOriginationQueue, e =>
-                {
-                    e.SetQuorumQueue();
-                    e.PrefetchCount = 40;
-                    e.UseConsumeFilter(typeof(LoggingFilter<>), context);
-
-                    e.UseMessageRetry(r =>
-                    {
-                        r.Exponential(
-                            retryLimit: 3,
-                            minInterval: TimeSpan.FromMilliseconds(100),
-                            maxInterval: TimeSpan.FromSeconds(2),
-                            intervalDelta: TimeSpan.FromMilliseconds(200));
-
-                        r.Ignore<PermanentException>();
-                    });
-
-                    e.UseDelayedRedelivery(r => r.Intervals(
-                        TimeSpan.FromSeconds(30),
-                        TimeSpan.FromMinutes(2),
-                        TimeSpan.FromMinutes(10)));
-
-                    e.Batch<SmartOriginationIntegrationEvent>(b =>
-                    {
-                        b.MessageLimit = 20;
-                        b.TimeLimit = TimeSpan.FromSeconds(5);
-                    });
-
-                    e.ConfigureConsumer<SmartOriginationConsumer>(context);
-                });
-
-                cfg.ReceiveEndpoint(UserOriginationQueue, e =>
-                {
-                    e.SetQuorumQueue();
-                    e.PrefetchCount = 40;
-                    e.UseConsumeFilter(typeof(LoggingFilter<>), context);
-
-                    e.UseMessageRetry(r =>
-                    {
-                        r.Exponential(
-                            retryLimit: 3,
-                            minInterval: TimeSpan.FromMilliseconds(100),
-                            maxInterval: TimeSpan.FromSeconds(2),
-                            intervalDelta: TimeSpan.FromMilliseconds(200));
-
-                        r.Ignore<PermanentException>();
-                    });
-
-                    e.UseDelayedRedelivery(r => r.Intervals(
-                        TimeSpan.FromSeconds(30),
-                        TimeSpan.FromMinutes(2),
-                        TimeSpan.FromMinutes(10)));
-
-                    e.Batch<UserOriginationConsumer>(b =>
-                    {
-                        b.MessageLimit = 20;
-                        b.TimeLimit = TimeSpan.FromSeconds(5);
-                    });
-
-                    e.ConfigureConsumer<UserOriginationConsumer>(context);
-                });
+                    ConfigureCountryEndpoint<UserOriginationIntegrationEvent, UserOriginationConsumer>(
+                        cfg, context, UserOriginationQueueBase, country.Code);
+                }
             });
         });
 
         return services;
+    }
+
+    private static void ConfigurePublishTopology<TMessage>(IRabbitMqBusFactoryConfigurator cfg)
+        where TMessage : class
+    {
+        cfg.Publish<TMessage>(publisher => publisher.ExchangeType = ExchangeType.Topic);
+    }
+
+    private static void ConfigureCountryEndpoint<TMessage, TConsumer>(
+        IRabbitMqBusFactoryConfigurator cfg,
+        IBusRegistrationContext context,
+        string baseQueue,
+        string routingKey)
+        where TMessage : class
+        where TConsumer : class, IConsumer
+    {
+        cfg.ReceiveEndpoint($"{baseQueue}_{routingKey}", e =>
+        {
+            e.ConfigureConsumeTopology = false;
+            e.Bind<TMessage>(bind => bind.RoutingKey = routingKey);
+
+            e.SetQuorumQueue();
+            e.PrefetchCount = 40;
+            e.UseConsumeFilter(typeof(LoggingFilter<>), context);
+
+            e.UseMessageRetry(r =>
+            {
+                r.Exponential(
+                    retryLimit: 3,
+                    minInterval: TimeSpan.FromMilliseconds(100),
+                    maxInterval: TimeSpan.FromSeconds(2),
+                    intervalDelta: TimeSpan.FromMilliseconds(200));
+
+                r.Ignore<PermanentException>();
+            });
+
+            e.UseDelayedRedelivery(r => r.Intervals(
+                TimeSpan.FromSeconds(30),
+                TimeSpan.FromMinutes(2),
+                TimeSpan.FromMinutes(10)));
+
+            e.Batch<TMessage>(b =>
+            {
+                b.MessageLimit = 20;
+                b.TimeLimit = TimeSpan.FromSeconds(5);
+            });
+
+            e.ConfigureConsumer<TConsumer>(context);
+        });
     }
 }

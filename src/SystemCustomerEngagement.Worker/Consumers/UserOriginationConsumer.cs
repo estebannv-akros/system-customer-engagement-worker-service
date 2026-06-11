@@ -1,6 +1,7 @@
-using app.microservice.customer.engagement.worker.Contracts;
 using AppMicroserviceCustomerEngagement.Application.UseCases;
+using AppMicroserviceCustomerEngagement.Worker.Extensions;
 using MassTransit;
+using app.microservice.customer.engagement.worker.Contracts;
 
 namespace app.microservice.customer.engagement.worker.Consumers;
 
@@ -10,7 +11,9 @@ public sealed class UserOriginationConsumer(
 {
     public async Task Consume(ConsumeContext<Batch<UserOriginationIntegrationEvent>> context)
     {
-        var contacts = context.Message.Select(m => m.Message).ToList();
+        var contacts = context.Message
+            .Select(messageContext => messageContext.Message.ToHubSpotContact())
+            .ToList();
 
         if (contacts.Count == 0)
         {

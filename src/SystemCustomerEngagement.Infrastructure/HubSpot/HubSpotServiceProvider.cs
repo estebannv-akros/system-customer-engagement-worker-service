@@ -18,10 +18,16 @@ public sealed class HubSpotServiceProvider(
         string flow,
         CancellationToken cancellationToken = default)
     {
-        foreach (var group in contacts.GroupBy(c => c.BrandId))
+        var brandGroups = contacts.GroupBy(c => c.BrandId).ToList();
+
+        if (brandGroups.Count > 1)
         {
-            await UpsertBrandBatchAsync(group.ToList(), group.Key, flow, cancellationToken);
+            throw new PermanentException(
+                "El batch contiene contactos de múltiples países. Verifica el routing key al publicar.");
         }
+
+        var brandId = brandGroups[0].Key;
+        await UpsertBrandBatchAsync(contacts, brandId, flow, cancellationToken);
     }
 
     private async Task UpsertBrandBatchAsync(
