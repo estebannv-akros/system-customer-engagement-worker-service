@@ -18,7 +18,7 @@ public static class HubSpotPublishExtensions
         CancellationToken cancellationToken = default) =>
         publishEndpoint.PublishByBrandId(message, message.BrandId, cancellationToken);
 
-    public static Task PublishUserRegistrationAsync(
+    public static Task PublishUserOriginationAsync(
         this IPublishEndpoint publishEndpoint,
         UserOriginationIntegrationEvent message,
         CancellationToken cancellationToken = default) =>

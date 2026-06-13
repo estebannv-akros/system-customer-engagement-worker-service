@@ -17,7 +17,7 @@ public static class MassTransitExtensions
         "customer_engagement_upsert_smart_origination_integration_event";
 
     public const string UserOriginationQueueBase =
-        "customer_engagement_upsert_user_registration_integration_event";
+        "customer_engagement_upsert_user_origination_integration_event";
 
     public static IServiceCollection AddMassTransitWithRabbitMq(
         this IServiceCollection services,
